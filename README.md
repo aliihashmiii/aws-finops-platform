@@ -10,41 +10,41 @@ Detects waste, optimizes spend, forecasts costs, and enforces governance across 
 
 ---
 
-## 🎯 Features
+## Features
 
-### 💰 Cost Visibility
+### Cost Visibility
 - Multi-dimensional cost breakdown (Service, Team, Environment, Application)
 - Historical trend analysis
 - Budget vs actual tracking
 - Unit economics (cost per customer, per transaction)
 
-### 🔍 Waste Detection
+### Waste Detection
 - **Compute:** Idle EC2 (<5% CPU), stopped instances, over-provisioned resources
 - **Storage:** Unattached EBS volumes, old snapshots (90+ days), unused EIPs
 - **Database:** Idle RDS instances, underutilized capacity
 - **Network:** Unused NAT Gateways, data transfer inefficiencies
 
-### ⚙️ Optimization Engine
+### Optimization Engine
 - Right-sizing recommendations (CPU/Memory analysis)
 - Reserved Instance & Savings Plan optimization
 - Storage class recommendations (S3, EBS)
 - Architecture improvements (serverless migration candidates)
 - Graviton2/3 migration opportunities
 
-### 📈 Cost Forecasting
+### Cost Forecasting
 - ML-based predictions (3/6/12/24 month forecasts)
 - Scenario modeling (baseline, conservative, aggressive optimization)
 - Growth impact analysis
 - Confidence intervals
 
-### 🛡️ Governance & Control
+### Governance & Control
 - Tag compliance checking
 - Budget threshold alerts
 - Policy violation detection
 - Anomaly detection (unusual spend spikes)
 - Auto-remediation capabilities
 
-### 📊 Professional Reporting
+### Professional Reporting
 - Executive summaries (PDF/HTML)
 - Detailed analysis reports
 - CSV export for automation
@@ -52,7 +52,7 @@ Detects waste, optimizes spend, forecasts costs, and enforces governance across 
 
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 ```bash
 # Clone the repository
@@ -72,7 +72,7 @@ python finops.py --analyze
 
 ---
 
-## 📊 Sample Output
+## Sample Output
 
 ```
 ═══════════════════════════════════════════════════════════════
@@ -84,20 +84,20 @@ Current Monthly Spend: $45,234.50
 Identified Waste: $13,450.00 (29.7%)
 Annual Impact: $161,400.00
 
-🔴 TOP WASTE SOURCES
+TOP WASTE SOURCES
 1. Idle EC2 Instances (12)          → $4,200/month
 2. Unattached EBS Volumes (45)      → $1,800/month
 3. Over-provisioned RDS (5)         → $3,250/month
 4. Old Snapshots (280)              → $2,850/month
 
-⚙️ QUICK WINS (This Week)
+QUICK WINS (This Week)
 ✓ Terminate idle instances          → $4,200/month
 ✓ Delete unattached volumes         → $1,800/month
 ✓ Right-size RDS databases          → $3,250/month
 
 Total 30-Day Impact: $9,250/month ($111,000/year)
 
-📈 12-MONTH FORECAST
+12-MONTH FORECAST
 Baseline (no optimization):         $652,000
 With optimization (30%):            $456,000
 Projected Savings:                  $196,000
@@ -106,7 +106,7 @@ Projected Savings:                  $196,000
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 aws-finops-platform/
@@ -146,7 +146,7 @@ aws-finops-platform/
 
 ---
 
-## 💻 Usage
+## Usage
 
 ### Basic Commands
 
@@ -214,7 +214,7 @@ tagging:
 
 ---
 
-## 📖 Documentation
+## Documentation
 
 - **[Installation Guide](docs/INSTALLATION.md)** - Setup instructions
 - **[Usage Guide](docs/USAGE.md)** - Complete user manual
@@ -223,7 +223,7 @@ tagging:
 
 ---
 
-## 🎯 Use Cases
+## Use Cases
 
 ### For Startups
 - Track burn rate and extend runway
@@ -242,7 +242,7 @@ tagging:
 
 ---
 
-## 🔒 Security
+## Security
 
 - **Read-only AWS access** - Never modifies infrastructure
 - **No data storage** - Analysis happens on-demand
@@ -273,7 +273,7 @@ tagging:
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 
@@ -308,7 +308,7 @@ Built with insights from:
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 - [x] Core FinOps engine (6 capabilities)
 - [x] CLI interface
@@ -322,7 +322,7 @@ Built with insights from:
 
 ---
 
-## 💡 Why This Project?
+## Why This Project?
 
 Cloud costs can spiral out of control quickly. Most companies waste 20-40% of their cloud budget on:
 - Resources left running 24/7 when only needed 8 hours
@@ -342,6 +342,6 @@ This platform helps you take control through:
 
 ### ⭐ If this saves you money, please star the repo! ⭐
 
-**Built with ☕ by FinOps practitioners, for FinOps practitioners**
+**Built as a self product while learning**
 
 </div>
