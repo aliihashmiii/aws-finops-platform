@@ -1,4 +1,4 @@
-# AWS FinOps Platform 🚀
+# AWS FinOps Platform 
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -56,7 +56,7 @@ Detects waste, optimizes spend, forecasts costs, and enforces governance across 
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/aws-finops-platform.git
+git clone https://github.com/aliihashmiii/aws-finops-platform.git
 cd aws-finops-platform
 
 # Install dependencies
