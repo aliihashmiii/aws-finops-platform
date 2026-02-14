@@ -1,0 +1,108 @@
+# AWS FinOps Platform Configuration
+
+# AWS Settings
+aws:
+  # Default region
+  default_region: us-east-1
+  
+  # Regions to scan (use 'all' for all enabled regions)
+  regions:
+    - us-east-1
+    - us-west-2
+  
+  # AWS profile from ~/.aws/credentials (optional)
+  profile: default
+
+# Analysis Settings
+analysis:
+  # CPU threshold for idle instance detection (percentage)
+  idle_cpu_threshold: 5.0
+  
+  # Number of days to check for idle instances
+  idle_days: 7
+  
+  # Snapshot age threshold (days)
+  old_snapshot_days: 90
+  
+  # EBS snapshot retention (days)
+  snapshot_retention: 30
+
+# Budget Settings (monthly USD)
+budgets:
+  engineering: 20000
+  data_science: 18000
+  infrastructure: 8000
+  total: 50000
+
+# Tagging Policy
+tagging:
+  # Required tags for all resources
+  required_tags:
+    - Environment
+    - Team
+    - CostCenter
+    - Project
+  
+  # Enforce tagging (report violations)
+  enforce: true
+  
+  # Valid environment values
+  valid_environments:
+    - production
+    - staging
+    - development
+    - qa
+
+# Reporting
+reporting:
+  # Default output format (text, json, pdf)
+  default_format: text
+  
+  # Auto-save reports
+  auto_save: true
+  
+  # Report output directory
+  output_dir: ./reports
+  
+  # Include detailed breakdowns
+  detailed: true
+
+# Optimization Preferences
+optimization:
+  # Consider Reserved Instances
+  recommend_ri: true
+  
+  # Consider Savings Plans
+  recommend_sp: true
+  
+  # Minimum savings threshold for recommendations (USD/month)
+  min_savings_threshold: 10.0
+  
+  # Risk tolerance (conservative, moderate, aggressive)
+  risk_profile: moderate
+
+# Notifications (optional)
+notifications:
+  # Slack webhook URL
+  slack:
+    enabled: false
+    webhook_url: ""
+    channel: "#finops"
+  
+  # Email notifications
+  email:
+    enabled: false
+    smtp_server: ""
+    from_address: ""
+    to_addresses: []
+
+# Advanced Features
+advanced:
+  # Enable ML-based forecasting (requires prophet library)
+  ml_forecasting: false
+  
+  # Enable anomaly detection
+  anomaly_detection: false
+  
+  # Enable multi-account support (requires AWS Organizations)
+  multi_account: false

@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# AWS Credentials - NEVER COMMIT THESE
+*.pem
+*.key
+.aws/
+credentials
+config/aws_credentials.yaml
+
+# Reports and outputs
+reports/*.pdf
+reports/*.html
+reports/*.csv
+reports/*.txt
+!reports/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.envrc
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+
+# Data files
+data/
+*.db
+*.sqlite
