@@ -302,9 +302,9 @@ Built with insights from:
 
 ## 📞 Support
 
-- **Issues:** [GitHub Issues](https://github.com/yourusername/aws-finops-platform/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/yourusername/aws-finops-platform/discussions)
-- **Email:** your.email@example.com
+- **Issues:** [GitHub Issues](https://github.com/aliihashmiii/aws-finops-platform/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/aliihashmiii/aws-finops-platform/discussions)
+- **Email:** alihashmi.1@outlook.com
 
 ---
 
