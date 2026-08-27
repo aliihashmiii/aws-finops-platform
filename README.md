@@ -73,7 +73,7 @@ Set `application.mode` to `live` in `config.yaml`, or set `FINOPS_MODE=live` in 
 
 ### Vercel deployment
 
-Vercel can deploy the existing FastAPI app through the `backend.main:app` entrypoint declared in `pyproject.toml`. Import this repository into a Vercel project, keep the default Python detection, and add the following **private** environment variables in the Vercel project settings: `FINOPS_MODE=live`, `FINOPS_AWS_REGION=us-east-1`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY`. The public UI and API then share the same Vercel origin, so no browser-side AWS credential handling is needed. Use an AWS IAM principal restricted to read-only FinOps collection actions, rotate it regularly, and never commit the values to GitHub.
+Vercel can deploy the existing FastAPI app through the root `main:app` entrypoint declared in `pyproject.toml`, which forwards to the application in `backend/main.py`. Import this repository into a Vercel project, keep the default Python detection, and add the following **private** environment variables in the Vercel project settings: `FINOPS_MODE=live`, `FINOPS_AWS_REGION=us-east-1`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY`. The public UI and API then share the same Vercel origin, so no browser-side AWS credential handling is needed. Use an AWS IAM principal restricted to read-only FinOps collection actions, rotate it regularly, and never commit the values to GitHub.
 
 The Vercel Hobby plan is suitable for personal demos, but serverless execution has request-duration and bundle limits. The site may use the static GitHub Pages URL for the credential-free demo, while the Vercel URL is the live-data deployment.
 
