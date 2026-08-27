@@ -7,6 +7,8 @@ from pathlib import Path
 from threading import Lock
 from typing import Any, Dict
 
+import os
+
 import yaml
 
 
@@ -50,7 +52,17 @@ class ConfigService:
         except (OSError, yaml.YAMLError) as exc:
             # The API remains usable with safe defaults, but surfaces the issue in health data.
             raw = {"_load_error": str(exc)}
-        return _merge(DEFAULTS, raw)
+        values = _merge(DEFAULTS, raw)
+        # Deployment providers can set non-secret runtime posture without editing the image.
+        # AWS credentials themselves are consumed by boto3's standard credential chain and
+        # are never copied into the configuration file or returned to the frontend.
+        mode = os.getenv("FINOPS_MODE")
+        region = os.getenv("FINOPS_AWS_REGION") or os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION")
+        if mode:
+            values["application"]["mode"] = mode
+        if region:
+            values["application"]["region"] = region
+        return values
 
     def snapshot(self) -> Dict[str, Any]:
         with self._lock:
