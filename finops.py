@@ -176,7 +176,8 @@ class AWSCollector:
         
         try:
             account_id = self.sts.get_caller_identity()['Account']
-        except:
+        except Exception as exc:
+            print(f"⚠️  Could not identify AWS account: {exc}")
             account_id = 'Unknown'
         
         data = {
@@ -197,8 +198,8 @@ class AWSCollector:
             cost_data = self._get_cost_data()
             data['costs_by_service'] = cost_data.get('by_service', {})
             data['total_monthly_cost'] = cost_data.get('total', 0)
-        except:
-            print("⚠️  Could not fetch cost data (requires Cost Explorer permissions)")
+        except Exception as exc:
+            print(f"⚠️  Could not fetch cost data (requires Cost Explorer permissions): {exc}")
         
         return data
     
@@ -240,8 +241,8 @@ class AWSCollector:
             if response['Datapoints']:
                 avg = sum(dp['Average'] for dp in response['Datapoints']) / len(response['Datapoints'])
                 return round(avg, 2)
-        except:
-            pass
+        except Exception as exc:
+            print(f"⚠️  Could not fetch CPU metrics for {instance_id}: {exc}")
         return None
     
     def _get_ebs_volumes(self) -> List[Dict]:
@@ -1099,7 +1100,8 @@ Examples:
     args = parser.parse_args()
     
     # Default to analyze if nothing specified
-    if not any([args.demo, args.analyze, args.visibility, args.waste, args.forecast]):
+    if not any([args.analyze, args.visibility, args.waste, args.forecast]):
+        # Demo without a subcommand means a full, credential-free analysis.
         args.analyze = True
     
     # Run

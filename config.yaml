@@ -1,108 +1,93 @@
-# AWS FinOps Platform Configuration
-
-# AWS Settings
+# Cloud FinOps Control Plane configuration
+# Credentials are intentionally not stored here. Use AWS credential chain, kubeconfig,
+# service-account credentials, and provider-specific environment variables.
 aws:
-  # Default region
   default_region: us-east-1
-  
-  # Regions to scan (use 'all' for all enabled regions)
   regions:
     - us-east-1
     - us-west-2
-  
-  # AWS profile from ~/.aws/credentials (optional)
   profile: default
 
-# Analysis Settings
 analysis:
-  # CPU threshold for idle instance detection (percentage)
   idle_cpu_threshold: 5.0
-  
-  # Number of days to check for idle instances
   idle_days: 7
-  
-  # Snapshot age threshold (days)
   old_snapshot_days: 90
-  
-  # EBS snapshot retention (days)
   snapshot_retention: 30
 
-# Budget Settings (monthly USD)
-budgets:
-  engineering: 20000
-  data_science: 18000
-  infrastructure: 8000
-  total: 50000
+governance:
+  required_tags:
+    - Environment
+    - Team
+    - CostCenter
+  kubernetes_require_requests: true
+  kubernetes_require_limits: true
+  ai_require_application_metadata: true
 
-# Tagging Policy
 tagging:
-  # Required tags for all resources
   required_tags:
     - Environment
     - Team
     - CostCenter
     - Project
-  
-  # Enforce tagging (report violations)
   enforce: true
-  
-  # Valid environment values
   valid_environments:
     - production
     - staging
     - development
     - qa
 
-# Reporting
+forecast:
+  horizon_months: 6
+  growth_rate: 0.05
+
+kubernetes:
+  cpu_efficiency_threshold: 0.40
+  memory_efficiency_threshold: 0.50
+  node_utilization_threshold: 0.30
+  safety_margin: 0.20
+
+ai_finops:
+  monthly_budget: 5000
+  alert_threshold: 80
+  high_cost_request: 0.10
+  optimization_sensitivity: medium
+
+application:
+  mode: demo
+  region: us-east-1
+  kubernetes_cluster: finops-demo
+  ai_provider: normalized-telemetry
+
+budgets:
+  engineering: 20000
+  data_science: 18000
+  infrastructure: 8000
+  total: 50000
+
 reporting:
-  # Default output format (text, json, pdf)
   default_format: text
-  
-  # Auto-save reports
   auto_save: true
-  
-  # Report output directory
   output_dir: ./reports
-  
-  # Include detailed breakdowns
   detailed: true
 
-# Optimization Preferences
 optimization:
-  # Consider Reserved Instances
   recommend_ri: true
-  
-  # Consider Savings Plans
   recommend_sp: true
-  
-  # Minimum savings threshold for recommendations (USD/month)
   min_savings_threshold: 10.0
-  
-  # Risk tolerance (conservative, moderate, aggressive)
   risk_profile: moderate
 
-# Notifications (optional)
 notifications:
-  # Slack webhook URL
   slack:
     enabled: false
     webhook_url: ""
     channel: "#finops"
-  
-  # Email notifications
   email:
     enabled: false
     smtp_server: ""
     from_address: ""
     to_addresses: []
 
-# Advanced Features
 advanced:
-  # Enable ML-based forecasting (requires prophet library)
   ml_forecasting: false
-  
-  # Enable anomaly detection
-  anomaly_detection: false
-  
-  # Enable multi-account support (requires AWS Organizations)
+  anomaly_detection: true
   multi_account: false

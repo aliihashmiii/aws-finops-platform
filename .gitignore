@@ -58,3 +58,10 @@ htmlcov/
 data/
 *.db
 *.sqlite
+
+# Frontend dependencies and local telemetry
+frontend/node_modules/
+frontend/.next/
+frontend/dist/
+ai_usage*.json
+validation_browser_notes.md

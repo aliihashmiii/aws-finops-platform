@@ -1,347 +1,216 @@
-# AWS FinOps Platform - Created and Maintained by Ali Hashmi 
+# Cloud FinOps Control Plane
 
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+**AWS + Kubernetes + AI cost visibility, allocation, waste detection, governance, and optimization.**
 
-**Professional-grade AWS FinOps platform for cloud cost optimization and financial management.**
+This repository extends the original AWS FinOps CLI into a portfolio-ready control plane. It preserves `finops.py` for CLI compatibility and adds a FastAPI backend plus a React dashboard. Demo mode uses the same data, analysis, API, and frontend path as live mode, so the product can be explored without cloud credentials.
 
-Detects waste, optimizes spend, forecasts costs, and enforces governance across your AWS infrastructure.
+![Cloud FinOps Control Plane dashboard](docs/screenshots/control-plane-dashboard.webp)
 
----
+## Product overview
 
-## Features
+The control plane closes three measurable optimization loops:
 
-### Cost Visibility
-- Multi-dimensional cost breakdown (Service, Team, Environment, Application)
-- Historical trend analysis
-- Budget vs actual tracking
-- Unit economics (cost per customer, per transaction)
-
-### Waste Detection
-- **Compute:** Idle EC2 (<5% CPU), stopped instances, over-provisioned resources
-- **Storage:** Unattached EBS volumes, old snapshots (90+ days), unused EIPs
-- **Database:** Idle RDS instances, underutilized capacity
-- **Network:** Unused NAT Gateways, data transfer inefficiencies
-
-### Optimization Engine
-- Right-sizing recommendations (CPU/Memory analysis)
-- Reserved Instance & Savings Plan optimization
-- Storage class recommendations (S3, EBS)
-- Architecture improvements (serverless migration candidates)
-- Graviton2/3 migration opportunities
-
-### Cost Forecasting
-- ML-based predictions (3/6/12/24 month forecasts)
-- Scenario modeling (baseline, conservative, aggressive optimization)
-- Growth impact analysis
-- Confidence intervals
-
-### Governance & Control
-- Tag compliance checking
-- Budget threshold alerts
-- Policy violation detection
-- Anomaly detection (unusual spend spikes)
-- Auto-remediation capabilities
-
-### Professional Reporting
-- Executive summaries (PDF/HTML)
-- Detailed analysis reports
-- CSV export for automation
-- Action plans with ROI calculations
-
----
-
-## Quick Start
-
-```bash
-# Clone the repository
-git clone https://github.com/aliihashmiii/aws-finops-platform.git
-cd aws-finops-platform
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run in DEMO mode (no AWS credentials needed!)
-python finops.py --demo
-
-# Or analyze your real AWS account
-aws configure  # Configure AWS credentials first
-python finops.py --analyze
+```text
+AWS:         Infrastructure → Usage → Cost → Waste → Optimization
+Kubernetes:  Requests → Actual Usage → Allocation → Efficiency → Rightsizing
+AI:          Tokens → Model → Cost → Latency/Quality → Optimization
 ```
 
----
-
-## Sample Output
-
-```
-═══════════════════════════════════════════════════════════════
-AWS FINOPS ANALYSIS REPORT
-═══════════════════════════════════════════════════════════════
-
-💰 EXECUTIVE SUMMARY
-Current Monthly Spend: $45,234.50
-Identified Waste: $13,450.00 (29.7%)
-Annual Impact: $161,400.00
-
-TOP WASTE SOURCES
-1. Idle EC2 Instances (12)          → $4,200/month
-2. Unattached EBS Volumes (45)      → $1,800/month
-3. Over-provisioned RDS (5)         → $3,250/month
-4. Old Snapshots (280)              → $2,850/month
-
-QUICK WINS (This Week)
-✓ Terminate idle instances          → $4,200/month
-✓ Delete unattached volumes         → $1,800/month
-✓ Right-size RDS databases          → $3,250/month
-
-Total 30-Day Impact: $9,250/month ($111,000/year)
-
-12-MONTH FORECAST
-Baseline (no optimization):         $652,000
-With optimization (30%):            $456,000
-Projected Savings:                  $196,000
-═══════════════════════════════════════════════════════════════
-```
-
----
+The centerpiece is cost intelligence and actionable recommendations, not a chatbot. Every recommendation includes a stable identity, platform, resource, category, estimated monthly savings, confidence, risk, source, and deterministic explanation. Savings are aggregated from unique finding identities so the same opportunity cannot be counted twice.
 
 ## Architecture
 
-```
-aws-finops-platform/
-├── finops.py                  # Main CLI (single entry point)
-├── requirements.txt           # Python dependencies
-├── config.yaml               # Configuration file
-│
-├── src/
-│   ├── collectors/           # AWS data collection
-│   │   ├── cost_data.py      # Cost Explorer integration
-│   │   ├── resource_data.py  # EC2, EBS, RDS, etc.
-│   │   └── metrics_data.py   # CloudWatch metrics
-│   │
-│   ├── analyzers/            # Analysis engines
-│   │   ├── cost_analyzer.py  # Cost visibility
-│   │   ├── waste_detector.py # Waste identification
-│   │   ├── optimizer.py      # Optimization recommendations
-│   │   └── forecaster.py     # ML-based forecasting
-│   │
-│   ├── reporting/            # Report generation
-│   │   ├── text_report.py    # Console output
-│   │   ├── pdf_report.py     # PDF generation
-│   │   └── html_report.py    # HTML dashboards
-│   │
-│   └── utils/                # Utilities
-│       ├── aws_pricing.py    # AWS pricing data
-│       └── helpers.py        # Common functions
-│
-├── tests/                    # Test suite
-│   └── test_*.py            # Unit tests
-│
-└── docs/                     # Documentation
-    ├── INSTALLATION.md       # Setup guide
-    ├── USAGE.md             # User manual
-    └── API.md               # API reference
+```text
+AWS Cost Explorer / CloudWatch / EC2 / EBS / RDS
+Kubernetes API / Prometheus / kube-state-metrics
+Normalized AI usage telemetry
+                 ↓
+         Collectors + demo data
+                 ↓
+       Unified FinOpsService engine
+                 ↓
+               FastAPI
+                 ↓
+        React control-plane dashboard
 ```
 
----
+The repository remains Python-first to preserve the original project and its CLI. The dashboard is a React 18 client served directly by FastAPI, which keeps the portfolio demo zero-build and runnable with two commands. It does not claim a Next.js runtime that is not present in this repository.
 
-## Usage
+## Implemented capabilities
 
-### Basic Commands
+| Domain | Implemented now | Data posture |
+| --- | --- | --- |
+| AWS FinOps | Cost breakdown by service, region, team, and environment; EC2/EBS/snapshot/EIP/RDS findings; tag governance; cost history; forecasting scenarios | Demo mode is complete. Live mode uses read-only boto3 collection and surfaces partial AWS errors. |
+| Kubernetes FinOps | Cluster, node, namespace, workload, requests-vs-usage efficiency, unallocated cost, replica and rightsizing findings | Demo mode is complete. Live discovery is an extension point; Prometheus and kube-state-metrics are required for usage-grade allocation. |
+| AI FinOps | Provider-neutral usage records, model/application allocation, token math, cost per request and per 1K tokens, caching/context/output/model recommendations, anomaly and unit-economics views | Demo mode is complete. Live mode accepts normalized JSON telemetry through `FINOPS_AI_USAGE_FILE`. |
+| Cross-platform | Unified recommendations, stable finding identities, savings deduplication, deterministic explanations, partial-data warnings, configurable thresholds | Implemented through `FinOpsService` and the API routes. |
+
+## Demo mode
+
+Demo mode is the default and requires no AWS credentials, Kubernetes cluster, Prometheus server, kube-state-metrics, or AI provider credentials.
 
 ```bash
-# Full analysis
-python finops.py --analyze
-
-# Cost visibility only
-python finops.py --visibility
-
-# Waste detection
-python finops.py --waste
-
-# 12-month forecast
-python finops.py --forecast 12
-
-# Generate PDF report
-python finops.py --analyze --format pdf --output report.pdf
-```
-
-### Advanced Options
-
-```bash
-# Specific region
-python finops.py --analyze --region us-east-1
-
-# Filter by tag
-python finops.py --analyze --tag Environment=Production
-
-# Export JSON
-python finops.py --analyze --format json --output data.json
-
-# Demo mode (no AWS credentials)
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 python finops.py --demo
+python3 -m uvicorn backend.main:app --reload
 ```
 
----
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000). The demo dataset includes AWS services and resources, a multi-node Kubernetes cluster with namespaces and workloads, and multiple AI providers and models. Totals reconcile across platform views.
 
-## 🔧 Configuration
+## Live mode
 
-Edit `config.yaml`:
+Set `application.mode` to `live` in `config.yaml`, or instantiate `FinOpsService(mode="live")` from an integration. AWS uses the standard boto3 credential chain and read-only API calls. Kubernetes discovery uses kubeconfig or in-cluster credentials when the optional `kubernetes` package is installed. AI live analysis reads normalized records from a file rather than accepting provider secrets in the browser.
+
+```bash
+FINOPS_AI_USAGE_FILE=/secure/path/ai-usage.json python3 -m uvicorn backend.main:app
+```
+
+A normalized AI usage record must contain `provider`, `model`, `timestamp`, `application`, `team`, `environment`, `input_tokens`, `output_tokens`, `request_count`, `latency_ms`, and `cost`. `cache_hit_rate` is optional.
+
+## Configuration
+
+`config.yaml` is loaded by `ConfigService` and controls the engine, API, and settings screen. The key thresholds are:
 
 ```yaml
-aws:
-  regions:
-    - us-east-1
-    - us-west-2
-  
 analysis:
   idle_cpu_threshold: 5.0
   idle_days: 7
-  snapshot_age_days: 90
+  old_snapshot_days: 90
 
-budgets:
-  engineering: 20000
-  data_science: 18000
-  infrastructure: 8000
-
-tagging:
+governance:
   required_tags:
     - Environment
     - Team
     - CostCenter
+
+forecast:
+  horizon_months: 6
+  growth_rate: 0.05
+
+kubernetes:
+  cpu_efficiency_threshold: 0.40
+  memory_efficiency_threshold: 0.50
+  node_utilization_threshold: 0.30
+  safety_margin: 0.20
+
+ai_finops:
+  monthly_budget: 5000
+  alert_threshold: 80
+  high_cost_request: 0.10
 ```
 
----
+The settings screen updates the allow-listed analysis values and writes them back to `config.yaml`. Required governance tags remain explicit policy rather than frontend-only labels.
 
-## Documentation
+## API reference
 
-- **[Installation Guide](docs/INSTALLATION.md)** - Setup instructions
-- **[Usage Guide](docs/USAGE.md)** - Complete user manual
-- **[API Reference](docs/API.md)** - Developer documentation
-- **[Examples](examples/)** - Sample outputs and use cases
+All endpoints return `status`, `mode`, `last_updated`, and `warnings` when applicable. A partial response is not silently converted to zero.
 
----
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/health` | Service health and available capabilities |
+| `GET /api/mode` | Demo/live mode, account, region, and warnings |
+| `GET /api/dashboard` | Unified spend, savings, platform posture, trend, and top findings |
+| `GET /api/costs` | AWS service, region, team, and environment cost views |
+| `GET /api/cost-history` | AWS + Kubernetes + AI historical series |
+| `GET /api/waste` | Positive-savings findings grouped as waste categories |
+| `GET /api/recommendations` | Deduplicated cross-platform recommendation queue |
+| `GET /api/recommendations/{id}` | Deterministic explanation for one finding |
+| `GET /api/forecast` | Baseline, conservative, and aggressive scenario model |
+| `GET /api/governance` | AWS tag, Kubernetes policy, and AI budget posture |
+| `GET /api/settings` | Current engine settings |
+| `PATCH /api/settings` | Update allow-listed runtime settings |
+| `GET /api/kubernetes/overview` | Cluster cost, allocation, utilization, namespaces, workloads, and findings |
+| `GET /api/kubernetes/clusters` | Cluster inventory |
+| `GET /api/kubernetes/nodes` | Node capacity and utilization |
+| `GET /api/kubernetes/namespaces` | Namespace showback allocation |
+| `GET /api/kubernetes/workloads` | Workload requests, usage, efficiency, and savings |
+| `GET /api/kubernetes/recommendations` | Kubernetes-only optimization queue |
+| `GET /api/kubernetes/cost-history` | Kubernetes cost history |
+| `GET /api/ai/overview` | Spend, tokens, blended cost, models, applications, and findings |
+| `GET /api/ai/usage` | Normalized AIUsage records |
+| `GET /api/ai/cost-history` | AI cost history |
+| `GET /api/ai/models` | Provider/model economics |
+| `GET /api/ai/applications` | Application, team, environment, and unit-cost allocation |
+| `GET /api/ai/recommendations` | AI optimization queue |
+| `GET /api/ai/anomalies` | Spend and token anomaly queue |
+| `GET /api/ai/unit-economics` | Cost per request, ticket, document, and 1K requests |
 
-## Use Cases
+Interactive API documentation is available at `/docs` while the backend is running.
 
-### For Startups
-- Track burn rate and extend runway
-- Optimize cost per customer
-- Prepare for investor meetings
+## Cost allocation and optimization methodology
 
-### For Enterprises
-- Multi-account cost allocation
-- Showback/chargeback reporting
-- Compliance and governance
+AWS cost visibility uses Cost Explorer groupings when live billing access is available and uses internally consistent service, region, team, and environment totals in demo mode. Resource findings are estimates unless backed by authoritative billing or pricing data.
 
-### For Consultants
-- Client cost audits
-- ROI demonstration
-- Ongoing optimization services
+Kubernetes allocation separates node cost into CPU and memory allocation, then aggregates to workloads and namespaces. Unallocated cluster cost remains visible and is not treated as savings. CPU efficiency is `actual CPU usage / CPU request`; memory efficiency is `actual memory usage / memory request`. Recommended requests include the configured safety margin and must be validated against sustained usage, SLOs, disruption budgets, and workload constraints.
 
----
+AI usage is normalized before analysis. Token totals equal input plus output tokens. Cost per 1K tokens equals `cost / total_tokens * 1,000`; cost per request equals `cost / request_count`. Model substitution, caching, prompt reduction, routing, batching, and output controls are evaluations with confidence and risk rather than guaranteed savings.
 
-## Security
+Every finding uses the identity `platform + resource_id + category`. `dedupe_findings()` keeps one finding per identity, and `total_savings()` sums only the deduplicated collection. This is the critical control against savings double-counting.
 
-- **Read-only AWS access** - Never modifies infrastructure
-- **No data storage** - Analysis happens on-demand
-- **Credential security** - Uses standard AWS SDK authentication
-- **IAM best practices** - Minimal required permissions
+## Security and permissions
 
-### Required IAM Permissions
+Never commit AWS access keys, provider secrets, kubeconfigs, or telemetry containing sensitive payloads. Use environment variables, the AWS credential chain, IAM roles/profiles, standard Kubernetes service-account or kubeconfig mechanisms, and provider-specific secret stores. The analysis path is intended to be read-only.
 
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ce:GetCostAndUsage",
-        "ce:GetCostForecast",
-        "ec2:Describe*",
-        "rds:Describe*",
-        "s3:ListBucket",
-        "cloudwatch:GetMetricStatistics"
-      ],
-      "Resource": "*"
-    }
-  ]
-}
+For AWS live mode, grant only the read permissions required by the enabled collectors, such as `sts:GetCallerIdentity`, `ce:GetCostAndUsage`, `ec2:DescribeInstances`, `ec2:DescribeVolumes`, `ec2:DescribeSnapshots`, `ec2:DescribeAddresses`, `rds:DescribeDBInstances`, and `cloudwatch:GetMetricStatistics`. Cost Explorer is regionalized through `us-east-1` by AWS. Review and narrow permissions for the account and regions in which the collector runs.
+
+For Kubernetes live mode, grant read access to nodes, namespaces, pods, deployments, stateful sets, and resource metadata. Prometheus and kube-state-metrics are needed for usage, request, limit, and replica telemetry. The current collector intentionally reports a partial-data warning when those sources are not available.
+
+## Repository map
+
+```text
+backend/
+  main.py                         FastAPI application and static frontend host
+  routes/                         Dashboard, AWS, Kubernetes, AI, and compatibility routes
+  services/                       Configuration and unified FinOps service
+  schemas/models.py               Typed request and response models
+finops/
+  demo_data.py                    Deterministic three-domain dataset
+  aws/collector.py                Read-only AWS collector
+  kubernetes/                     Collector and calculation modules
+  ai/usage.py                     Normalized AIUsage loader
+  models/findings.py              Finding identity and deduplication
+frontend/
+  index.html                      React shell
+  app.js                          API-backed dashboard client
+  styles.css                      Enterprise dark UI system
+  vendor/                         Locally vendored React runtime
+finops.py                         Original CLI compatibility layer
+config.yaml                       Application configuration
+ tests/                           Calculation and API-engine tests
 ```
 
----
+## Testing and validation
 
-## Contributing
+```bash
+python3 -m compileall -q .
+python3 -m pytest -q
+python3 -m uvicorn backend.main:app
+```
 
-Contributions welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+The test suite covers AWS thresholds, Kubernetes efficiency and safe requests, AI token/cost calculations, forecasting scenarios, governance gaps, and the duplicate-finding control. The validated demo path loads the dashboard, AWS, Kubernetes, AI, forecast, governance, and settings views through the API.
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## Known limitations
 
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file.
-
----
-
-## 🙏 Acknowledgments
-
-Built with insights from:
-- [FinOps Foundation](https://www.finops.org/) best practices
-- [AWS Cost Optimization](https://aws.amazon.com/aws-cost-management/) resources
-- Open-source FinOps community tools
-
----
-
-## 📞 Support
-
-- **Issues:** [GitHub Issues](https://github.com/aliihashmiii/aws-finops-platform/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/aliihashmiii/aws-finops-platform/discussions)
-- **Email:** alihashmi.1@outlook.com
-
----
+Live AWS resource pricing is not inferred from hard-coded approximate values. Where Cost Explorer or pricing data is unavailable, the API surfaces a partial warning rather than presenting a false zero. Live Kubernetes discovery currently proves API connectivity but requires Prometheus and kube-state-metrics for usage-grade allocation. Live AI integrations are intentionally provider-neutral and currently use normalized JSON telemetry; direct OpenAI, Anthropic, Google, Azure OpenAI, and Bedrock adapters are extension points. No automatic remediation is implemented.
 
 ## Roadmap
 
-- [x] Core FinOps engine (6 capabilities)
-- [x] CLI interface
-- [x] Demo mode
-- [ ] Web dashboard (React)
-- [ ] Multi-account support (AWS Organizations)
-- [ ] Azure & GCP support
-- [ ] Slack/Teams integration
-- [ ] API server mode
-- [ ] Terraform integration
+The following items are explicitly **not implemented** in this version: AWS Pricing API enrichment, Compute Optimizer and Cost Optimization Hub integration, Savings Plans optimization, AWS Organizations multi-account support, production Prometheus and kube-state-metrics adapters, EKS-specific allocation, multi-cluster support, autoscaler optimization, OpenTelemetry LLM telemetry, more provider adapters, quality-aware routing, semantic caching, AI forecasting, an LLM-based FinOps analyst, FOCUS normalization, policy-as-code, automated remediation, and budget workflow integrations.
 
----
+## Legacy CLI
 
-## Why This Project?
+The original CLI remains available:
 
-Cloud costs can spiral out of control quickly. Most companies waste 20-40% of their cloud budget on:
-- Resources left running 24/7 when only needed 8 hours
-- Over-provisioned instances (paying for capacity you don't use)
-- Orphaned resources (volumes, snapshots from deleted instances)
-- Lack of Reserved Instance/Savings Plan optimization
+```bash
+python finops.py --demo
+python finops.py --analyze
+python finops.py --waste
+python finops.py --forecast 12
+python finops.py --analyze --format json --output data.json
+```
 
-This platform helps you take control through:
-- **Automated detection** of waste
-- **Data-driven recommendations** 
-- **Financial forecasting** to prevent surprises
-- **Governance enforcement** to prevent future waste
+## License
 
----
-
-<div align="center">
-
-### ⭐ If this saves you money, please star the repo! ⭐
-
-**Built as a self product while learning**
-
-</div>
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
