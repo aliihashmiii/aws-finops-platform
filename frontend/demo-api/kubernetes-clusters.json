@@ -1,0 +1,18 @@
+{
+  "clusters": [
+    {
+      "allocated_cost": 10560.0,
+      "cluster_id": "cluster-demo",
+      "efficiency": 82.2,
+      "monthly_cost": 12840.0,
+      "name": "finops-demo",
+      "provider": "EKS-compatible",
+      "region": "us-east-1",
+      "unallocated_cost": 2280.0
+    }
+  ],
+  "last_updated": "2026-08-27T02:15:05.716471+00:00",
+  "mode": "demo",
+  "status": "ok",
+  "warnings": []
+}

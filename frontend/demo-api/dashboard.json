@@ -1,0 +1,217 @@
+{
+  "history": [
+    {
+      "AI": 4816.8,
+      "AWS": 37999.2,
+      "Kubernetes": 10704.0,
+      "period": "2025-09",
+      "total": 53520.0
+    },
+    {
+      "AI": 4932.9,
+      "AWS": 38915.1,
+      "Kubernetes": 10962.0,
+      "period": "2025-10",
+      "total": 54810.0
+    },
+    {
+      "AI": 5061.6,
+      "AWS": 39930.4,
+      "Kubernetes": 11248.0,
+      "period": "2025-11",
+      "total": 56240.0
+    },
+    {
+      "AI": 5146.2,
+      "AWS": 40597.8,
+      "Kubernetes": 11436.0,
+      "period": "2025-12",
+      "total": 57180.0
+    },
+    {
+      "AI": 5261.4,
+      "AWS": 41506.6,
+      "Kubernetes": 11692.0,
+      "period": "2026-01",
+      "total": 58460.0
+    },
+    {
+      "AI": 5328.9,
+      "AWS": 42039.1,
+      "Kubernetes": 11842.0,
+      "period": "2026-02",
+      "total": 59210.0
+    },
+    {
+      "AI": 5412.6,
+      "AWS": 42699.4,
+      "Kubernetes": 12028.0,
+      "period": "2026-03",
+      "total": 60140.0
+    },
+    {
+      "AI": 5527.8,
+      "AWS": 43608.2,
+      "Kubernetes": 12284.0,
+      "period": "2026-04",
+      "total": 61420.0
+    },
+    {
+      "AI": 5632.2,
+      "AWS": 44431.8,
+      "Kubernetes": 12516.0,
+      "period": "2026-05",
+      "total": 62580.0
+    },
+    {
+      "AI": 5679.9,
+      "AWS": 44808.1,
+      "Kubernetes": 12622.0,
+      "period": "2026-06",
+      "total": 63110.0
+    },
+    {
+      "AI": 5660.1,
+      "AWS": 44651.9,
+      "Kubernetes": 12578.0,
+      "period": "2026-07",
+      "total": 62890.0
+    },
+    {
+      "AI": 5722.56,
+      "AWS": 45144.64,
+      "Kubernetes": 12716.8,
+      "period": "2026-08",
+      "total": 63584.0
+    }
+  ],
+  "last_updated": "2026-08-27T02:15:05.714660+00:00",
+  "mode": "demo",
+  "platforms": [
+    {
+      "name": "AWS",
+      "savings": 325.05,
+      "spend": 45234.5
+    },
+    {
+      "name": "Kubernetes",
+      "savings": 2629.33,
+      "spend": 12840.0
+    },
+    {
+      "name": "AI",
+      "savings": 1520,
+      "spend": 5510.0
+    }
+  ],
+  "status": "ok",
+  "summary": {
+    "ai_spend": 5510.0,
+    "aws_spend": 45234.5,
+    "finding_count": 26,
+    "kubernetes_spend": 12840.0,
+    "overall_efficiency": 82.0,
+    "potential_monthly_savings": 4474.38,
+    "total_monthly_spend": 63584.5,
+    "waste_pct": 7.0
+  },
+  "top_opportunities": [
+    {
+      "category": "workload-rightsizing",
+      "confidence": "High",
+      "estimated_monthly_savings": 1016.4,
+      "explanation": "CPU efficiency is 20.0% and memory efficiency is 26.2%. Recommendations retain a configurable safety margin and are not a blind match to current usage.",
+      "id": "kubernetes:wl-checkout:workload-rightsizing",
+      "issue": "checkout-api is requesting more capacity than its observed usage supports.",
+      "platform": "Kubernetes",
+      "priority": "HIGH",
+      "recommendation": "Evaluate CPU request 0.96 cores and memory request 2.52 GiB using a sustained utilization window and safety margin.",
+      "resource_id": "wl-checkout",
+      "resource_type": "Deployment",
+      "risk": "High",
+      "service": "Kubernetes",
+      "source": "Kubernetes API + Prometheus"
+    },
+    {
+      "category": "model-overprovisioning",
+      "confidence": "Medium",
+      "estimated_monthly_savings": 620,
+      "explanation": "Model substitution is an evaluation, not a guaranteed quality-preserving change. Validate accuracy, latency, and escalation behavior.",
+      "id": "ai:customer-support:model-overprovisioning",
+      "issue": "Premium model usage is concentrated in a support workload with classification-like traffic.",
+      "platform": "AI",
+      "priority": "HIGH",
+      "recommendation": "Evaluate a lower-cost model for simple classification and extraction after quality validation.",
+      "resource_id": "Customer Support",
+      "resource_type": "Model workload",
+      "risk": "High",
+      "service": "AI",
+      "source": "Normalized AI usage"
+    },
+    {
+      "category": "workload-rightsizing",
+      "confidence": "High",
+      "estimated_monthly_savings": 543.95,
+      "explanation": "CPU efficiency is 23.3% and memory efficiency is 30.0%. Recommendations retain a configurable safety margin and are not a blind match to current usage.",
+      "id": "kubernetes:wl-search:workload-rightsizing",
+      "issue": "search-indexer is requesting more capacity than its observed usage supports.",
+      "platform": "Kubernetes",
+      "priority": "HIGH",
+      "recommendation": "Evaluate CPU request 0.84 cores and memory request 2.88 GiB using a sustained utilization window and safety margin.",
+      "resource_id": "wl-search",
+      "resource_type": "StatefulSet",
+      "risk": "Medium",
+      "service": "Kubernetes",
+      "source": "Kubernetes API + Prometheus"
+    },
+    {
+      "category": "cache-opportunity",
+      "confidence": "Medium",
+      "estimated_monthly_savings": 430,
+      "explanation": "The observed cache hit rate is 12.0%; savings require a validated cache policy and freshness boundary.",
+      "id": "ai:customer-support:cache-opportunity",
+      "issue": "Repeated or highly similar prompts suggest a cacheable request cohort.",
+      "platform": "AI",
+      "priority": "HIGH",
+      "recommendation": "Evaluate semantic or exact-response caching for deterministic support intents.",
+      "resource_id": "Customer Support",
+      "resource_type": "AI application",
+      "risk": "Medium",
+      "service": "AI",
+      "source": "Normalized AI usage"
+    },
+    {
+      "category": "node-consolidation",
+      "confidence": "Medium",
+      "estimated_monthly_savings": 307.5,
+      "explanation": "The estimate assumes a compatible consolidation path; it is not an automatic remediation recommendation.",
+      "id": "kubernetes:node-001:node-consolidation",
+      "issue": "Node ip-10-0-3-42 is underutilized at 15.5% average CPU/memory utilization.",
+      "platform": "Kubernetes",
+      "priority": "MEDIUM",
+      "recommendation": "Evaluate consolidation with another compatible node after checking topology, disruption budgets, and workload constraints.",
+      "resource_id": "node-001",
+      "resource_type": "Node",
+      "risk": "High",
+      "service": "Kubernetes",
+      "source": "Kubernetes API + Prometheus"
+    },
+    {
+      "category": "excessive-input",
+      "confidence": "Medium",
+      "estimated_monthly_savings": 290,
+      "explanation": "Input-token reduction should be evaluated against answer quality and retrieval recall.",
+      "id": "ai:customer-support:excessive-input",
+      "issue": "Average input context is unusually large for a material request volume.",
+      "platform": "AI",
+      "priority": "MEDIUM",
+      "recommendation": "Reduce redundant context, summarize history, and retrieve only relevant documents.",
+      "resource_id": "Customer Support",
+      "resource_type": "AI application",
+      "risk": "Medium",
+      "service": "AI",
+      "source": "Normalized AI usage"
+    }
+  ],
+  "warnings": []
+}

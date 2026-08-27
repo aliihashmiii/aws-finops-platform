@@ -1,0 +1,36 @@
+{
+  "last_updated": "2026-08-27T02:15:05.717357+00:00",
+  "metrics": [
+    {
+      "denominator_count": 469000,
+      "metric": "Cost per AI request",
+      "numerator_cost": 5510.0,
+      "unit": "USD/request",
+      "value": 0.0117
+    },
+    {
+      "denominator_count": 54118,
+      "metric": "Cost per support ticket",
+      "numerator_cost": 1840,
+      "unit": "USD/ticket",
+      "value": 0.034
+    },
+    {
+      "denominator_count": 83889,
+      "metric": "Cost per document processed",
+      "numerator_cost": 1510,
+      "unit": "USD/document",
+      "value": 0.018
+    },
+    {
+      "denominator_count": 469000,
+      "metric": "Cost per 1,000 API requests",
+      "numerator_cost": 5510.0,
+      "unit": "USD/1K requests",
+      "value": 11.75
+    }
+  ],
+  "mode": "demo",
+  "status": "ok",
+  "warnings": []
+}

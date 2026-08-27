@@ -1,0 +1,27 @@
+{
+  "last_updated": "2026-08-27T02:15:05.716278+00:00",
+  "mode": "demo",
+  "settings": {
+    "alert_threshold": 80,
+    "cpu_efficiency_threshold": 0.4,
+    "forecast_horizon_months": 6,
+    "growth_rate": 0.05,
+    "high_cost_request": 0.1,
+    "idle_cpu_threshold": 5.0,
+    "idle_days": 7,
+    "memory_efficiency_threshold": 0.5,
+    "mode": "demo",
+    "monthly_budget": 5000,
+    "node_utilization_threshold": 0.3,
+    "old_snapshot_days": 90,
+    "region": "us-east-1",
+    "required_tags": [
+      "Environment",
+      "Team",
+      "CostCenter"
+    ],
+    "safety_margin": 0.2
+  },
+  "status": "ok",
+  "warnings": []
+}

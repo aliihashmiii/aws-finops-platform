@@ -1,0 +1,19 @@
+{
+  "anomalies": [
+    {
+      "detail": "Input tokens are up 62%; premium model usage is the top contributor.",
+      "estimated_additional_cost": 840,
+      "id": "ai-spend-spike",
+      "primary_cause": "Customer Support application",
+      "severity": "HIGH",
+      "status": "investigate",
+      "title": "AI spend increased 47% this week"
+    }
+  ],
+  "baseline_spend": 3748.3,
+  "current_spend": 5510.0,
+  "last_updated": "2026-08-27T02:15:05.717350+00:00",
+  "mode": "demo",
+  "status": "ok",
+  "warnings": []
+}

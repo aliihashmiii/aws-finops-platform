@@ -1,0 +1,72 @@
+{
+  "last_updated": "2026-08-27T02:15:05.716983+00:00",
+  "mode": "demo",
+  "recommendations": [
+    {
+      "category": "model-overprovisioning",
+      "confidence": "Medium",
+      "estimated_monthly_savings": 620,
+      "explanation": "Model substitution is an evaluation, not a guaranteed quality-preserving change. Validate accuracy, latency, and escalation behavior.",
+      "id": "ai:customer-support:model-overprovisioning",
+      "issue": "Premium model usage is concentrated in a support workload with classification-like traffic.",
+      "platform": "AI",
+      "priority": "HIGH",
+      "recommendation": "Evaluate a lower-cost model for simple classification and extraction after quality validation.",
+      "resource_id": "Customer Support",
+      "resource_type": "Model workload",
+      "risk": "High",
+      "service": "AI",
+      "source": "Normalized AI usage"
+    },
+    {
+      "category": "cache-opportunity",
+      "confidence": "Medium",
+      "estimated_monthly_savings": 430,
+      "explanation": "The observed cache hit rate is 12.0%; savings require a validated cache policy and freshness boundary.",
+      "id": "ai:customer-support:cache-opportunity",
+      "issue": "Repeated or highly similar prompts suggest a cacheable request cohort.",
+      "platform": "AI",
+      "priority": "HIGH",
+      "recommendation": "Evaluate semantic or exact-response caching for deterministic support intents.",
+      "resource_id": "Customer Support",
+      "resource_type": "AI application",
+      "risk": "Medium",
+      "service": "AI",
+      "source": "Normalized AI usage"
+    },
+    {
+      "category": "excessive-input",
+      "confidence": "Medium",
+      "estimated_monthly_savings": 290,
+      "explanation": "Input-token reduction should be evaluated against answer quality and retrieval recall.",
+      "id": "ai:customer-support:excessive-input",
+      "issue": "Average input context is unusually large for a material request volume.",
+      "platform": "AI",
+      "priority": "MEDIUM",
+      "recommendation": "Reduce redundant context, summarize history, and retrieve only relevant documents.",
+      "resource_id": "Customer Support",
+      "resource_type": "AI application",
+      "risk": "Medium",
+      "service": "AI",
+      "source": "Normalized AI usage"
+    },
+    {
+      "category": "output-variance",
+      "confidence": "Low",
+      "estimated_monthly_savings": 180,
+      "explanation": "The estimate is a scenario based on output-token control, not a provider invoice adjustment.",
+      "id": "ai:document-processing:output-variance",
+      "issue": "Output-token variance creates avoidable spend volatility.",
+      "platform": "AI",
+      "priority": "MEDIUM",
+      "recommendation": "Use structured output and explicit response constraints where the task allows it.",
+      "resource_id": "Document Processing",
+      "resource_type": "AI application",
+      "risk": "Low",
+      "service": "AI",
+      "source": "Normalized AI usage"
+    }
+  ],
+  "status": "ok",
+  "warnings": []
+}

@@ -1,0 +1,35 @@
+{
+  "last_updated": "2026-08-27T02:15:05.716648+00:00",
+  "mode": "demo",
+  "namespaces": [
+    {
+      "cluster_cost_pct": 66.7,
+      "cpu_cost": 3872.0,
+      "memory_cost": 3168.0,
+      "monthly_cost": 7040.0,
+      "namespace": "production",
+      "pod_count": 7,
+      "workload_count": 2
+    },
+    {
+      "cluster_cost_pct": 29.8,
+      "cpu_cost": 1732.5,
+      "memory_cost": 1417.5,
+      "monthly_cost": 3150.0,
+      "namespace": "staging",
+      "pod_count": 7,
+      "workload_count": 2
+    },
+    {
+      "cluster_cost_pct": 16.3,
+      "cpu_cost": 946.0,
+      "memory_cost": 774.0,
+      "monthly_cost": 1720.0,
+      "namespace": "development",
+      "pod_count": 4,
+      "workload_count": 2
+    }
+  ],
+  "status": "ok",
+  "warnings": []
+}

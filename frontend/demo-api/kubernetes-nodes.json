@@ -1,0 +1,68 @@
+{
+  "last_updated": "2026-08-27T02:15:05.716643+00:00",
+  "mode": "demo",
+  "nodes": [
+    {
+      "cpu_capacity": 8.0,
+      "cpu_requested": 4.0,
+      "cpu_usage": 0.96,
+      "cpu_utilization": 0.12,
+      "instance_type": "m5.2xlarge",
+      "memory_capacity": 32.0,
+      "memory_requested": 20.0,
+      "memory_usage": 6.08,
+      "memory_utilization": 0.19,
+      "monthly_cost": 410.0,
+      "name": "ip-10-0-3-42",
+      "node_id": "node-001",
+      "utilization": 0.155
+    },
+    {
+      "cpu_capacity": 8.0,
+      "cpu_requested": 6.0,
+      "cpu_usage": 5.44,
+      "cpu_utilization": 0.68,
+      "instance_type": "m5.2xlarge",
+      "memory_capacity": 32.0,
+      "memory_requested": 24.0,
+      "memory_usage": 20.48,
+      "memory_utilization": 0.64,
+      "monthly_cost": 410.0,
+      "name": "ip-10-0-4-17",
+      "node_id": "node-002",
+      "utilization": 0.66
+    },
+    {
+      "cpu_capacity": 8.0,
+      "cpu_requested": 5.0,
+      "cpu_usage": 3.84,
+      "cpu_utilization": 0.48,
+      "instance_type": "r6i.2xlarge",
+      "memory_capacity": 64.0,
+      "memory_requested": 48.0,
+      "memory_usage": 38.4,
+      "memory_utilization": 0.6,
+      "monthly_cost": 520.0,
+      "name": "ip-10-0-5-09",
+      "node_id": "node-003",
+      "utilization": 0.54
+    },
+    {
+      "cpu_capacity": 4.0,
+      "cpu_requested": 1.0,
+      "cpu_usage": 0.48,
+      "cpu_utilization": 0.12,
+      "instance_type": "m5.xlarge",
+      "memory_capacity": 16.0,
+      "memory_requested": 4.0,
+      "memory_usage": 3.04,
+      "memory_utilization": 0.19,
+      "monthly_cost": 260.0,
+      "name": "ip-10-0-6-11",
+      "node_id": "node-004",
+      "utilization": 0.155
+    }
+  ],
+  "status": "ok",
+  "warnings": []
+}

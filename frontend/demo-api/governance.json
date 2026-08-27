@@ -1,0 +1,176 @@
+{
+  "ai": {
+    "budget_compliance": 0,
+    "budget_utilization": 100,
+    "monthly_budget": 5000.0,
+    "spend": 5510.0
+  },
+  "aws": {
+    "by_tag": {
+      "CostCenter": 55.6,
+      "Environment": 61.1,
+      "Team": 61.1
+    },
+    "overall": 59.3,
+    "resources": [
+      {
+        "compliant": true,
+        "missing_tags": [],
+        "resource_id": "i-demo001",
+        "resource_type": "ec2_instance"
+      },
+      {
+        "compliant": true,
+        "missing_tags": [],
+        "resource_id": "i-demo002",
+        "resource_type": "ec2_instance"
+      },
+      {
+        "compliant": true,
+        "missing_tags": [],
+        "resource_id": "i-demo003",
+        "resource_type": "ec2_instance"
+      },
+      {
+        "compliant": false,
+        "missing_tags": [
+          "CostCenter"
+        ],
+        "resource_id": "i-demo004",
+        "resource_type": "ec2_instance"
+      },
+      {
+        "compliant": true,
+        "missing_tags": [],
+        "resource_id": "i-prod001",
+        "resource_type": "ec2_instance"
+      },
+      {
+        "compliant": true,
+        "missing_tags": [],
+        "resource_id": "i-prod002",
+        "resource_type": "ec2_instance"
+      },
+      {
+        "compliant": false,
+        "missing_tags": [
+          "Environment",
+          "Team",
+          "CostCenter"
+        ],
+        "resource_id": "vol-demo001",
+        "resource_type": "ebs_volume"
+      },
+      {
+        "compliant": false,
+        "missing_tags": [
+          "Environment",
+          "Team",
+          "CostCenter"
+        ],
+        "resource_id": "vol-demo002",
+        "resource_type": "ebs_volume"
+      },
+      {
+        "compliant": true,
+        "missing_tags": [],
+        "resource_id": "vol-demo003",
+        "resource_type": "ebs_volume"
+      },
+      {
+        "compliant": true,
+        "missing_tags": [],
+        "resource_id": "vol-demo004",
+        "resource_type": "ebs_volume"
+      },
+      {
+        "compliant": false,
+        "missing_tags": [
+          "Environment",
+          "Team",
+          "CostCenter"
+        ],
+        "resource_id": "snap-demo001",
+        "resource_type": "snapshot"
+      },
+      {
+        "compliant": false,
+        "missing_tags": [
+          "Environment",
+          "Team",
+          "CostCenter"
+        ],
+        "resource_id": "snap-demo002",
+        "resource_type": "snapshot"
+      },
+      {
+        "compliant": false,
+        "missing_tags": [
+          "Environment",
+          "Team",
+          "CostCenter"
+        ],
+        "resource_id": "snap-demo003",
+        "resource_type": "snapshot"
+      },
+      {
+        "compliant": false,
+        "missing_tags": [
+          "Environment",
+          "Team",
+          "CostCenter"
+        ],
+        "resource_id": "snap-demo004",
+        "resource_type": "snapshot"
+      },
+      {
+        "compliant": false,
+        "missing_tags": [
+          "Environment",
+          "Team",
+          "CostCenter"
+        ],
+        "resource_id": "eip-demo001",
+        "resource_type": "elastic_ip"
+      },
+      {
+        "compliant": true,
+        "missing_tags": [],
+        "resource_id": "eip-demo002",
+        "resource_type": "elastic_ip"
+      },
+      {
+        "compliant": true,
+        "missing_tags": [],
+        "resource_id": "db-demo001",
+        "resource_type": "rds_instance"
+      },
+      {
+        "compliant": true,
+        "missing_tags": [],
+        "resource_id": "db-prod001",
+        "resource_type": "rds_instance"
+      }
+    ]
+  },
+  "kubernetes": {
+    "limits_compliance": 66.7,
+    "requests_compliance": 83.3,
+    "workloads_without_limits": [
+      "search-indexer",
+      "report-cron"
+    ],
+    "workloads_without_requests": [
+      "report-cron"
+    ]
+  },
+  "last_updated": "2026-08-27T02:15:05.716250+00:00",
+  "mode": "demo",
+  "required_tags": [
+    "Environment",
+    "Team",
+    "CostCenter"
+  ],
+  "status": "ok",
+  "warnings": []
+}

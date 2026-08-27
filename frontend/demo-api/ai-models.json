@@ -1,0 +1,68 @@
+{
+  "last_updated": "2026-08-27T02:15:05.716958+00:00",
+  "mode": "demo",
+  "models": [
+    {
+      "cost": 1840.0,
+      "cost_per_1k_tokens": 0.0368,
+      "cost_per_request": 0.01472,
+      "input_tokens": 42000000,
+      "latency_ms": 740.0,
+      "model": "gpt-4o",
+      "output_tokens": 8000000,
+      "provider": "OpenAI",
+      "requests": 125000,
+      "total_tokens": 50000000
+    },
+    {
+      "cost": 1510.0,
+      "cost_per_1k_tokens": 0.1313,
+      "cost_per_request": 0.02796,
+      "input_tokens": 10000000,
+      "latency_ms": 820.0,
+      "model": "gemini-1.5-pro",
+      "output_tokens": 1500000,
+      "provider": "Google",
+      "requests": 54000,
+      "total_tokens": 11500000
+    },
+    {
+      "cost": 920.0,
+      "cost_per_1k_tokens": 0.02486,
+      "cost_per_request": 0.0115,
+      "input_tokens": 31000000,
+      "latency_ms": 610.0,
+      "model": "claude-3-5-sonnet",
+      "output_tokens": 6000000,
+      "provider": "Anthropic",
+      "requests": 80000,
+      "total_tokens": 37000000
+    },
+    {
+      "cost": 830.0,
+      "cost_per_1k_tokens": 0.09222,
+      "cost_per_request": 0.02075,
+      "input_tokens": 8000000,
+      "latency_ms": 350.0,
+      "model": "amazon.nova-lite",
+      "output_tokens": 1000000,
+      "provider": "AWS Bedrock",
+      "requests": 40000,
+      "total_tokens": 9000000
+    },
+    {
+      "cost": 410.0,
+      "cost_per_1k_tokens": 0.02828,
+      "cost_per_request": 0.00241,
+      "input_tokens": 12000000,
+      "latency_ms": 290.0,
+      "model": "gpt-4o-mini",
+      "output_tokens": 2500000,
+      "provider": "OpenAI",
+      "requests": 170000,
+      "total_tokens": 14500000
+    }
+  ],
+  "status": "ok",
+  "warnings": []
+}

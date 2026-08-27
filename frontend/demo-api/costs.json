@@ -1,0 +1,30 @@
+{
+  "by_environment": {
+    "development": 4534.5,
+    "production": 31650.0,
+    "staging": 9050.0
+  },
+  "by_region": {
+    "eu-west-1": 0.0,
+    "us-east-1": 38420.0,
+    "us-west-2": 14814.5
+  },
+  "by_service": {
+    "Data Transfer": 4890.0,
+    "EBS": 2100.0,
+    "EC2": 18450.0,
+    "Other": 1824.5,
+    "RDS": 12300.0,
+    "S3": 5670.0
+  },
+  "by_team": {
+    "Backend": 7464.5,
+    "Data": 15670.0,
+    "Engineering": 22100.0
+  },
+  "last_updated": "2026-08-27T02:15:05.714862+00:00",
+  "mode": "demo",
+  "status": "ok",
+  "total_monthly_cost": 45234.5,
+  "warnings": []
+}

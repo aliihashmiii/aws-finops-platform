@@ -6,6 +6,10 @@ This repository extends the original AWS FinOps CLI into a portfolio-ready contr
 
 ![Cloud FinOps Control Plane dashboard](docs/screenshots/control-plane-dashboard.webp)
 
+> **Permanent demo site:** [aliihashmiii.github.io/aws-finops-platform](https://aliihashmiii.github.io/aws-finops-platform/)
+
+The public site is a credential-free, read-only demo powered by repository-local JSON fixtures. The FastAPI deployment remains available for live AWS, Kubernetes, and normalized AI telemetry integrations.
+
 ## Product overview
 
 The control plane closes three measurable optimization loops:
@@ -34,7 +38,7 @@ Normalized AI usage telemetry
         React control-plane dashboard
 ```
 
-The repository remains Python-first to preserve the original project and its CLI. The dashboard is a React 18 client served directly by FastAPI, which keeps the portfolio demo zero-build and runnable with two commands. It does not claim a Next.js runtime that is not present in this repository.
+The repository remains Python-first to preserve the original project and its CLI. The dashboard is a React 18 client that can be served directly by FastAPI or published as a static GitHub Pages project site. The static build uses the same deterministic demo responses as the backend and falls back from `/api/*` calls to `frontend/demo-api/*.json`. It does not claim a Next.js runtime that is not present in this repository.
 
 ## Implemented capabilities
 
@@ -58,6 +62,10 @@ python3 -m uvicorn backend.main:app --reload
 ```
 
 Open [http://127.0.0.1:8000](http://127.0.0.1:8000). The demo dataset includes AWS services and resources, a multi-node Kubernetes cluster with namespaces and workloads, and multiple AI providers and models. Totals reconcile across platform views.
+
+### Permanent static website
+
+The repository includes a GitHub Actions workflow at `.github/workflows/pages.yml`. Once GitHub Pages is enabled for **Deploy from a GitHub Actions workflow**, every push to `main` publishes the `frontend/` directory to the project-site URL shown above. The site is intentionally read-only in static mode: settings changes are previewed locally but are not written to `config.yaml` without the FastAPI backend. Run `python3 scripts/generate_static_demo.py` after changing demo service behavior so the committed fixtures stay synchronized.
 
 ## Live mode
 
@@ -173,9 +181,14 @@ finops/
   models/findings.py              Finding identity and deduplication
 frontend/
   index.html                      React shell
-  app.js                          API-backed dashboard client
+  app.js                          API-backed dashboard client with static fallback
   styles.css                      Enterprise dark UI system
+  demo-api/                       Generated read-only fixtures for GitHub Pages
   vendor/                         Locally vendored React runtime
+scripts/
+  generate_static_demo.py         Refresh static fixtures from the FinOps service
+.github/workflows/
+  pages.yml                       Permanent GitHub Pages deployment workflow
 finops.py                         Original CLI compatibility layer
 config.yaml                       Application configuration
  tests/                           Calculation and API-engine tests
