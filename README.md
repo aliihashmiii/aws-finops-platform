@@ -65,7 +65,7 @@ Open [http://127.0.0.1:8000](http://127.0.0.1:8000). The demo dataset includes A
 
 ### Permanent static website
 
-The repository includes a GitHub Actions workflow at `.github/workflows/pages.yml`. Once GitHub Pages is enabled for **Deploy from a GitHub Actions workflow**, every push to `main` publishes the `frontend/` directory to the project-site URL shown above. The site is intentionally read-only in static mode: settings changes are previewed locally but are not written to `config.yaml` without the FastAPI backend. Run `python3 scripts/generate_static_demo.py` after changing demo service behavior so the committed fixtures stay synchronized.
+The repository includes a ready-to-publish static artifact under `docs/`. In GitHub, open **Settings → Pages**, choose **Deploy from a branch**, select `main`, select the `/docs` folder, and save. GitHub Pages will publish the project-site URL shown above. The site is intentionally read-only in static mode: settings changes are previewed locally but are not written to `config.yaml` without the FastAPI backend. Run `python3 scripts/generate_static_demo.py` after changing demo service behavior so both `frontend/demo-api/` and `docs/demo-api/` stay synchronized.
 
 ## Live mode
 
@@ -187,8 +187,11 @@ frontend/
   vendor/                         Locally vendored React runtime
 scripts/
   generate_static_demo.py         Refresh static fixtures from the FinOps service
-.github/workflows/
-  pages.yml                       Permanent GitHub Pages deployment workflow
+docs/
+  index.html                      Branch-based GitHub Pages artifact
+  app.js, styles.css              Static dashboard assets
+  demo-api/                       Generated read-only fixtures
+  vendor/                         Locally vendored React runtime
 finops.py                         Original CLI compatibility layer
 config.yaml                       Application configuration
  tests/                           Calculation and API-engine tests

@@ -12,11 +12,12 @@ sys.path.insert(0, str(ROOT))
 
 from backend.services.finops_service import FinOpsService
 
-OUT = ROOT / "frontend" / "demo-api"
+OUTS = [ROOT / "frontend" / "demo-api", ROOT / "docs" / "demo-api"]
 
 
 def main() -> None:
-    OUT.mkdir(parents=True, exist_ok=True)
+    for output in OUTS:
+        output.mkdir(parents=True, exist_ok=True)
     service = FinOpsService(mode="demo")
     payloads = {
         "health": service.health(),
@@ -46,9 +47,10 @@ def main() -> None:
         "ai-anomalies": service.ai_anomalies(),
         "ai-unit-economics": service.ai_unit_economics(),
     }
-    for name, payload in payloads.items():
-        (OUT / f"{name}.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(f"wrote {len(payloads)} fixtures to {OUT}")
+    for output in OUTS:
+        for name, payload in payloads.items():
+            (output / f"{name}.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(f"wrote {len(payloads)} fixtures to {len(OUTS)} static targets")
 
 
 if __name__ == "__main__":
