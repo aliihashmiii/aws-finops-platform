@@ -1,7 +1,7 @@
 {
   "ai": {
     "budget_compliance": 0,
-    "budget_utilization": 100,
+    "budget_utilization": 110.2,
     "monthly_budget": 5000.0,
     "spend": 5510.0
   },
@@ -164,7 +164,7 @@
       "report-cron"
     ]
   },
-  "last_updated": "2026-08-27T02:17:51.973147+00:00",
+  "last_updated": "2026-11-12T03:55:08.067493+00:00",
   "mode": "demo",
   "required_tags": [
     "Environment",

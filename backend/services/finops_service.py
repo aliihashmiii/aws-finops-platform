@@ -181,7 +181,9 @@ class FinOpsService:
         findings = self.all_findings()
         savings = total_savings(findings)
         total = round(aws_spend + k8s_spend + ai_spend, 2)
-        return {**self._envelope(), "summary": {"total_monthly_spend": total, "potential_monthly_savings": savings, "waste_pct": round(savings / total * 100, 1) if total else 0, "overall_efficiency": 82.0, "aws_spend": aws_spend, "kubernetes_spend": k8s_spend, "ai_spend": ai_spend, "finding_count": len(findings)}, "platforms": [{"name": "AWS", "spend": aws_spend, "savings": total_savings(self._aws_findings())}, {"name": "Kubernetes", "spend": k8s_spend, "savings": total_savings(self._k8s_findings())}, {"name": "AI", "spend": ai_spend, "savings": total_savings(self._ai_findings())}], "top_opportunities": findings[:6], "history": self.cost_history()["history"]}
+        budgets = self.config.snapshot().get("budgets", {}) or {}
+        monthly_budget = float(budgets.get("total", 0) or 0)
+        return {**self._envelope(), "account_id": self.data.get("account_id"), "region": self.data.get("region"), "summary": {"total_monthly_spend": total, "potential_monthly_savings": savings, "waste_pct": round(savings / total * 100, 1) if total else 0, "overall_efficiency": 82.0, "aws_spend": aws_spend, "kubernetes_spend": k8s_spend, "ai_spend": ai_spend, "finding_count": len(findings), "monthly_budget": monthly_budget, "budget_utilization": round(total / monthly_budget * 100, 1) if monthly_budget else None}, "platforms": [{"name": "AWS", "spend": aws_spend, "savings": total_savings(self._aws_findings())}, {"name": "Kubernetes", "spend": k8s_spend, "savings": total_savings(self._k8s_findings())}, {"name": "AI", "spend": ai_spend, "savings": total_savings(self._ai_findings())}], "top_opportunities": findings[:6], "history": self.cost_history()["history"]}
 
     def costs(self) -> Dict[str, Any]:
         return {**self._envelope(), "total_monthly_cost": self.aws.get("total_monthly_cost", 0), "by_service": self.aws.get("costs_by_service", {}), "by_region": self.aws.get("costs_by_region", {}), "by_team": self.aws.get("costs_by_team", {}), "by_environment": self.aws.get("costs_by_environment", {})}
@@ -235,7 +237,7 @@ class FinOpsService:
         k8s_limits = round(sum(1 for item in workloads if item["has_limits"]) / len(workloads) * 100, 1) if workloads else 100
         ai_spend = self.dashboard()["summary"]["ai_spend"]
         budget = float(config.get("ai_finops", {}).get("monthly_budget", 5000))
-        ai_budget = round(min(100, ai_spend / budget * 100), 1) if budget else 0
+        ai_budget = round(ai_spend / budget * 100, 1) if budget else 0
         compliance = round(sum(tag_scores.values()) / len(tag_scores), 1) if tag_scores else 100
         return {**self._envelope(), "required_tags": required, "aws": {"overall": compliance, "by_tag": tag_scores, "resources": resources}, "kubernetes": {"requests_compliance": k8s_requests, "limits_compliance": k8s_limits, "workloads_without_requests": [item["name"] for item in workloads if not item["has_requests"]], "workloads_without_limits": [item["name"] for item in workloads if not item["has_limits"]]}, "ai": {"monthly_budget": budget, "spend": ai_spend, "budget_utilization": ai_budget, "budget_compliance": round(max(0, 100 - ai_budget), 1)}}
 

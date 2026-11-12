@@ -65,7 +65,7 @@ Open [http://127.0.0.1:8000](http://127.0.0.1:8000). The demo dataset includes A
 
 ### Permanent static website
 
-The repository includes a ready-to-publish static artifact under `docs/`. In GitHub, open **Settings → Pages**, choose **Deploy from a branch**, select `main`, select the `/docs` folder, and save. GitHub Pages will publish the project-site URL shown above. The site is intentionally read-only in static mode: settings changes are previewed locally but are not written to `config.yaml` without the FastAPI backend. Run `python3 scripts/generate_static_demo.py` after changing demo service behavior so both `frontend/demo-api/` and `docs/demo-api/` stay synchronized.
+The repository includes a ready-to-publish static artifact under `docs/`. In GitHub, open **Settings → Pages**, choose **Deploy from a branch**, select `main`, select the `/docs` folder, and save. GitHub Pages will publish the project-site URL shown above. The site is intentionally read-only in static mode: settings changes are previewed locally but are not written to `config.yaml` without the FastAPI backend. Run `python3 scripts/generate_static_demo.py` after changing the frontend or demo service behavior; it regenerates `frontend/demo-api/` and `docs/demo-api/` and copies the client (`index.html`, `app.js`, `styles.css`, `vendor/`) into `docs/` so the Pages site never drifts from the app.
 
 ## Live mode
 
@@ -188,7 +188,7 @@ finops/
 frontend/
   index.html                      React shell
   app.js                          API-backed dashboard client with static fallback
-  styles.css                      Enterprise dark UI system
+  styles.css                      Light/dark design tokens and layout
   demo-api/                       Generated read-only fixtures for GitHub Pages
   vendor/                         Locally vendored React runtime
 scripts/

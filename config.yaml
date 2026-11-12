@@ -62,7 +62,7 @@ budgets:
   engineering: 20000
   data_science: 18000
   infrastructure: 8000
-  total: 50000
+  total: 70000
 
 reporting:
   default_format: text
