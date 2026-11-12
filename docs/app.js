@@ -81,6 +81,7 @@ const ICONS = {
   trend: 'M22 7 13.5 15.5 8.5 10.5 2 17M16 7h6v6',
   book: 'M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5',
   shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+  gauge: 'M12 14l4-4M3.3 19a10 10 0 1 1 17.4 0M12 14a1 1 0 1 0 0 .01',
 };
 function Icon({ name, size = 20, stroke = 1.8, className }) {
   return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: stroke, strokeLinecap: 'round', strokeLinejoin: 'round', className, 'aria-hidden': 'true' }, h('path', { d: ICONS[name] || '' }));
@@ -111,7 +112,7 @@ const CATEGORY = {
 const catLabel = (c) => (CATEGORY[c] && CATEGORY[c].label) || c.replace(/-/g, ' ');
 const catIcon = (c) => (CATEGORY[c] && CATEGORY[c].icon) || 'zap';
 const effortOf = (risk) => ({ Low: 'low', Medium: 'medium', High: 'high' }[risk] || 'medium');
-const PLATFORM_COLORS = { AWS: '#f2711c', Kubernetes: '#1f7a4d', AI: '#f2b632' };
+const PLATFORM_COLORS = { AWS: '#f2711c', Kubernetes: '#1f7a4d', AI: '#7c5cd6' };
 
 function groupByCategory(findings) {
   const map = new Map();
@@ -150,7 +151,17 @@ function LineChart({ labels, series, height = 230, yFormat = compact, refLine, h
   const y = (v) => padT + innerH - (v / max) * innerH;
   const ticks = [0, .25, .5, .75, 1].map((t) => t * max);
   const every = Math.max(1, Math.ceil(labels.length / Math.max(2, Math.floor(innerW / 70))));
-  const pathOf = (vals) => { let d = ''; vals.forEach((v, i) => { if (v == null) return; d += (d ? 'L' : 'M') + x(i).toFixed(1) + ',' + y(v).toFixed(1); }); return d; };
+  const pathOf = (vals, smooth) => {
+    const pts = vals.map((v, i) => v == null ? null : [x(i), y(v)]).filter(Boolean);
+    if (!pts.length) return '';
+    if (!smooth || pts.length < 3) return 'M' + pts.map((p) => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join('L');
+    let d = 'M' + pts[0][0].toFixed(1) + ',' + pts[0][1].toFixed(1);
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2, t = 0.18;
+      d += `C${(p1[0] + (p2[0] - p0[0]) * t).toFixed(1)},${(p1[1] + (p2[1] - p0[1]) * t).toFixed(1)} ${(p2[0] - (p3[0] - p1[0]) * t).toFixed(1)},${(p2[1] - (p3[1] - p1[1]) * t).toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+    }
+    return d;
+  };
   const onMove = (e) => { const r = e.currentTarget.getBoundingClientRect(); const px = e.clientX - r.left; const i = Math.round((px - padL) / (innerW / Math.max(1, labels.length - 1))); setHover(Math.max(0, Math.min(labels.length - 1, i))); };
   const hoverSeries = hover == null ? null : series.find((s) => s.values[hover] != null);
   const gradId = useMemo(() => 'g' + Math.random().toString(36).slice(2, 8), []);
@@ -159,13 +170,13 @@ function LineChart({ labels, series, height = 230, yFormat = compact, refLine, h
       h('defs', null, series.filter((s) => s.fill).map((s, k) => h('linearGradient', { key: k, id: gradId + k, x1: 0, y1: 0, x2: 0, y2: 1 }, h('stop', { offset: 0, stopColor: s.color, stopOpacity: .28 }), h('stop', { offset: 1, stopColor: s.color, stopOpacity: .02 })))),
       ticks.map((t, i) => h('g', { key: 't' + i }, h('line', { className: 'grid-line', x1: padL, x2: width - padR, y1: y(t), y2: y(t) }), h('text', { className: 'axis-text', x: padL - 8, y: y(t) + 4, textAnchor: 'end' }, yFormat(t)))),
       refLine && h('g', null, h('line', { x1: padL, x2: width - padR, y1: y(refLine.value), y2: y(refLine.value), stroke: refLine.color, strokeDasharray: '6 5', strokeWidth: 1.6 }), h('text', { className: 'axis-text', x: padL + 6, y: y(refLine.value) - 7, textAnchor: 'start', style: { fill: refLine.color, fontWeight: 600 } }, refLine.label)),
-      series.filter((s) => s.fill).map((s, k) => { const pts = s.values.map((v, i) => v == null ? null : [x(i), y(v)]).filter(Boolean); if (pts.length < 2) return null; const d = 'M' + pts.map((p) => p.join(',')).join('L') + `L${pts[pts.length - 1][0]},${y(0)}L${pts[0][0]},${y(0)}Z`; return h('path', { key: 'a' + k, d, fill: `url(#${gradId}${k})` }); }),
-      series.map((s, k) => h('path', { key: 'l' + k, d: pathOf(s.values), fill: 'none', stroke: s.color, strokeWidth: s.width || 2.4, strokeDasharray: s.dashed ? '6 5' : undefined, strokeLinecap: 'round', strokeLinejoin: 'round', opacity: s.opacity || 1 })),
+      series.filter((s) => s.fill).map((s, k) => { const pts = s.values.map((v, i) => v == null ? null : [x(i), y(v)]).filter(Boolean); if (pts.length < 2) return null; const d = pathOf(s.values, s.smooth) + `L${pts[pts.length - 1][0]},${y(0)}L${pts[0][0]},${y(0)}Z`; return h('path', { key: 'a' + k, d, fill: `url(#${gradId}${k})` }); }),
+      series.map((s, k) => h('path', { key: 'l' + k, d: pathOf(s.values, s.smooth), fill: 'none', stroke: s.color, strokeWidth: s.width || 2.4, strokeDasharray: s.dashed ? '6 5' : undefined, strokeLinecap: 'round', strokeLinejoin: 'round', opacity: s.opacity || 1 })),
       labels.map((l, i) => { const last = labels.length - 1; const show = i === last || (i % every === 0 && last - i >= Math.max(1, every * 0.75)); return show ? h('text', { key: 'x' + i, className: 'axis-text', x: x(i), y: height - 6, textAnchor: i === last && labels.length > 1 ? 'end' : i === 0 ? 'start' : 'middle' }, l) : null; }),
       highlight != null && h('circle', { cx: x(highlight.index), cy: y(highlight.value), r: 5, fill: highlight.color, stroke: 'var(--surface)', strokeWidth: 2 }),
       hover != null && h('line', { x1: x(hover), x2: x(hover), y1: padT, y2: padT + innerH, stroke: 'var(--line-strong)', strokeDasharray: '3 3' }),
       hover != null && series.map((s, k) => s.values[hover] == null ? null : h('circle', { key: 'c' + k, cx: x(hover), cy: y(s.values[hover]), r: 4.5, fill: s.color, stroke: 'var(--surface)', strokeWidth: 2 }))),
-    hover != null && hoverSeries && h('div', { className: 'tooltip', style: { left: x(hover), top: y(hoverSeries.values[hover]) } }, series.filter((s) => s.values[hover] != null).map((s) => h('div', { key: s.name }, h('strong', { className: 'num' }, money(s.values[hover])), h('span', null, s.name))), h('span', null, labels[hover])));
+    hover != null && hoverSeries && h('div', { className: 'tooltip gf', style: { left: x(hover), top: y(Math.max(...series.map((s) => s.values[hover] == null ? 0 : s.values[hover]))) } }, h('span', { className: 'tt-title' }, labels[hover]), series.filter((s) => s.values[hover] != null).map((s) => h('div', { className: 'tt-row', key: s.name }, h('i', { style: { background: s.color } }), s.name, h('b', { className: 'num' }, money(s.values[hover]))))));
 }
 
 function Sparkline({ values, color = 'var(--green)', width = 96, height = 42 }) {
@@ -206,6 +217,97 @@ function Donut({ items, size = 168, stroke = 30, centerLabel, centerSub }) {
   return h('div', { style: { position: 'relative', width: size, height: size, flexShrink: 0 } },
     h('svg', { width: size, height: size, style: { transform: 'rotate(-90deg)' }, role: 'img', 'aria-label': 'Spend by platform' }, items.map((it, i) => { const len = c * it.value / total; const el = h('circle', { key: i, cx: size / 2, cy: size / 2, r, fill: 'none', stroke: it.color, strokeWidth: stroke, strokeDasharray: `${Math.max(0, len - 2)} ${c}`, strokeDashoffset: -offset }); offset += len; return el; })),
     h('div', { className: 'donut-center' }, h('strong', { className: 'num' }, centerLabel), h('span', null, centerSub)));
+}
+
+/* ---------------------------------------------------------------- Grafana-style panel kit
+ * Thresholds follow Grafana semantics: an ascending list of steps; a value takes the colour of
+ * the last step whose `value` is <= it. That lets "too low" and "too high" both be warnings. */
+const T = {
+  good: 'var(--green)', warn: 'var(--amber)', bad: 'var(--red)', info: 'var(--blue)',
+  higherIsBetter: (warnAt, okAt) => [{ value: -Infinity, color: 'var(--red)' }, { value: warnAt, color: 'var(--amber)' }, { value: okAt, color: 'var(--green)' }],
+  lowerIsBetter: (warnAt, badAt) => [{ value: -Infinity, color: 'var(--green)' }, { value: warnAt, color: 'var(--amber)' }, { value: badAt, color: 'var(--red)' }],
+  band: (low, okLow, okHigh) => [{ value: -Infinity, color: 'var(--red)' }, { value: low, color: 'var(--amber)' }, { value: okLow, color: 'var(--green)' }, { value: okHigh, color: 'var(--amber)' }],
+};
+const thresholdColor = (v, steps) => { let c = steps && steps.length ? steps[0].color : 'var(--green)'; (steps || []).forEach((s) => { if (v >= s.value) c = s.color; }); return c; };
+const SERIES_COLORS = ['#1f7a4d', '#f2711c', '#7c5cd6', '#2a9d8f', '#f2b632', '#3b6fd8', '#d64545', '#5fb48a'];
+
+function Panel({ title, info, right, children, span = 4, className = '', minHeight }) {
+  return h('section', { className: `panel s${span} ${className}`, style: minHeight ? { minHeight } : null },
+    h('header', { className: 'panel-head' }, h('h3', null, title), info && h('span', { className: 'panel-info', title: info, 'aria-label': info }, 'i'), right && h('div', { className: 'panel-right' }, right)),
+    h('div', { className: 'panel-body' }, children));
+}
+
+const polar = (cx, cy, r, deg) => { const a = (deg - 90) * Math.PI / 180; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
+const arc = (cx, cy, r, a0, a1) => { const [x0, y0] = polar(cx, cy, r, a0), [x1, y1] = polar(cx, cy, r, a1); return `M${x0.toFixed(2)},${y0.toFixed(2)} A${r},${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1.toFixed(2)},${y1.toFixed(2)}`; };
+
+function Gauge({ value, min = 0, max = 100, thresholds, unit = '%', decimals = 0, label }) {
+  const v = Number(value || 0), clamped = Math.max(min, Math.min(max, v));
+  const START = -120, SWEEP = 240, toAngle = (x) => START + (Math.max(min, Math.min(max, x)) - min) / (max - min || 1) * SWEEP;
+  const color = thresholdColor(v, thresholds);
+  const bands = (thresholds || []).map((s, i, arr) => ({ from: Math.max(min, s.value === -Infinity ? min : s.value), to: i + 1 < arr.length ? Math.min(max, arr[i + 1].value) : max, color: s.color })).filter((b) => b.to > b.from);
+  return h('div', { className: 'gauge' }, h('svg', { viewBox: '0 0 200 160', role: 'img', 'aria-label': `${label || 'Gauge'}: ${v.toFixed(decimals)}${unit}` },
+    bands.map((b, i) => h('path', { key: i, d: arc(100, 100, 86, toAngle(b.from) + 0.6, toAngle(b.to) - 0.6), stroke: b.color, strokeWidth: 4, fill: 'none', opacity: .9 })),
+    h('path', { d: arc(100, 100, 72, START, START + SWEEP), stroke: 'var(--surface-3)', strokeWidth: 16, fill: 'none', strokeLinecap: 'round' }),
+    clamped > min && h('path', { d: arc(100, 100, 72, START, toAngle(clamped)), stroke: color, strokeWidth: 16, fill: 'none', strokeLinecap: 'round' }),
+    h('text', { x: 100, y: 104, textAnchor: 'middle', className: 'gauge-value', style: { fill: color } }, v.toFixed(decimals) + unit),
+    h('text', { x: 100, y: 124, textAnchor: 'middle', className: 'gauge-label' }, label || ''),
+    h('text', { x: polar(100, 100, 72, START)[0] - 4, y: 157, textAnchor: 'middle', className: 'gauge-minmax' }, min + unit),
+    h('text', { x: polar(100, 100, 72, START + SWEEP)[0] + 4, y: 157, textAnchor: 'middle', className: 'gauge-minmax' }, max + unit)));
+}
+
+function BarGauge({ items, max, thresholds, mode = 'lcd', format = (v) => v.toFixed(0) + '%', cells = 28 }) {
+  const top = max != null ? max : Math.max(...items.map((i) => i.value), 1);
+  return h('div', { className: 'bar-gauges' }, items.map((it) => {
+    const ratio = Math.max(0, Math.min(1, it.value / top)), color = thresholdColor(it.value, thresholds);
+    return h('div', { className: 'bar-gauge', key: it.key || it.label, title: `${it.label}: ${format(it.value)}` },
+      h('div', { className: 'bg-label' }, it.label, it.sub && h('span', null, it.sub)),
+      mode === 'lcd'
+        ? h('div', { className: 'bg-lcd' }, Array.from({ length: cells }, (_, i) => { const cellValue = (i + 0.5) / cells * top; const on = (i + 0.5) / cells <= ratio; return h('i', { key: i, style: { background: on ? thresholdColor(cellValue, thresholds) : undefined, opacity: on ? 1 : undefined } }); }))
+        : h('div', { className: 'bg-track' }, h('div', { className: 'bg-fill', style: { width: ratio * 100 + '%', background: thresholds ? `linear-gradient(90deg, ${thresholds.map((s) => s.color).join(', ')})` : color, backgroundSize: ratio ? (100 / ratio) + '% 100%' : '100% 100%' } })),
+      h('div', { className: 'bg-value num', style: { color } }, format(it.value)));
+  }));
+}
+
+function StatPanel({ value, display, spark, thresholds, sub, color }) {
+  const c = color || (thresholds ? thresholdColor(value, thresholds) : 'var(--green)');
+  return h('div', { className: 'stat-panel' }, h('div', { className: 'stat-value num', style: { color: c } }, display != null ? display : value), sub && h('div', { className: 'stat-sub' }, sub), spark && spark.length > 1 && h('div', { className: 'stat-spark' }, h(AreaSpark, { values: spark, color: c })));
+}
+
+function BarChart({ labels, series, stacked = false, height = 240, yFormat = compact, valueFormat = money }) {
+  const [ref, width] = useWidth();
+  const [hover, setHover] = useState(null);
+  const padL = 50, padR = 10, padT = 10, padB = 28, innerW = Math.max(10, width - padL - padR), innerH = height - padT - padB;
+  const totals = labels.map((_, i) => stacked ? sum(series.map((s) => s.values[i])) : Math.max(...series.map((s) => Number(s.values[i] || 0))));
+  const max = niceMax(Math.max(...totals, 1) * 1.05), y = (v) => padT + innerH - v / max * innerH;
+  const slot = innerW / Math.max(1, labels.length), groupW = slot * 0.68, barW = stacked ? groupW : groupW / series.length;
+  const every = Math.max(1, Math.ceil(labels.length / Math.max(2, Math.floor(innerW / 60))));
+  return h('div', { className: 'chart-wrap', ref },
+    h('svg', { width, height, role: 'img', 'aria-label': series.map((s) => s.name).join(', ') + ' bar chart', onMouseLeave: () => setHover(null) },
+      [0, .25, .5, .75, 1].map((t, i) => h('g', { key: i }, h('line', { className: 'grid-line', x1: padL, x2: width - padR, y1: y(t * max), y2: y(t * max) }), h('text', { className: 'axis-text', x: padL - 8, y: y(t * max) + 4, textAnchor: 'end' }, yFormat(t * max)))),
+      labels.map((l, i) => { const x0 = padL + i * slot + (slot - groupW) / 2; let acc = 0; return h('g', { key: i, onMouseEnter: () => setHover(i) },
+        h('rect', { x: padL + i * slot, y: padT, width: slot, height: innerH, fill: hover === i ? 'var(--surface-2)' : 'transparent' }),
+        series.map((s, k) => { const v = Number(s.values[i] || 0); const top = stacked ? y(acc + v) : y(v); const hgt = stacked ? y(acc) - y(acc + v) : y(0) - y(v); const bx = stacked ? x0 : x0 + k * barW; acc += v; return h('rect', { key: k, x: bx + (stacked ? 0 : 1), y: top, width: Math.max(1, barW - (stacked ? 0 : 2)), height: Math.max(0, hgt - (stacked && k < series.length - 1 ? 0 : 0)), rx: stacked ? (k === series.length - 1 ? 3 : 0) : 3, fill: s.color, opacity: hover == null || hover === i ? 1 : .55 }); }),
+        (i % every === 0) && h('text', { className: 'axis-text', x: padL + i * slot + slot / 2, y: height - 8, textAnchor: 'middle' }, l)); })),
+    hover != null && h('div', { className: 'tooltip gf', style: { left: padL + hover * slot + slot / 2, top: y(totals[hover]) } },
+      h('span', { className: 'tt-title' }, labels[hover]), series.map((s) => h('div', { className: 'tt-row', key: s.name }, h('i', { style: { background: s.color } }), s.name, h('b', { className: 'num' }, valueFormat(s.values[hover])))), stacked && h('div', { className: 'tt-row total' }, 'Total', h('b', { className: 'num' }, valueFormat(totals[hover])))));
+}
+
+function HBarChart({ items, format = money, color = 'var(--green)', thresholds }) {
+  const max = Math.max(...items.map((i) => i.value), 1);
+  return h('div', { className: 'hbars' }, items.map((it, i) => h('div', { className: 'hbar', key: it.label + i, title: `${it.label}: ${format(it.value)}` },
+    h('div', { className: 'hbar-label' }, it.label),
+    h('div', { className: 'hbar-track' }, h('div', { className: 'hbar-fill', style: { width: Math.max(1.5, it.value / max * 100) + '%', background: it.color || (thresholds ? thresholdColor(it.value, thresholds) : color) } })),
+    h('div', { className: 'hbar-value num' }, format(it.value)))));
+}
+
+function LegendTable({ series, format = money }) {
+  const stats = (vals) => { const v = vals.filter((x) => x != null).map(Number); return v.length ? { mean: sum(v) / v.length, max: Math.max(...v), last: v[v.length - 1] } : { mean: 0, max: 0, last: 0 }; };
+  return h('table', { className: 'legend-table' }, h('thead', null, h('tr', null, h('th', null, 'Series'), h('th', null, 'Mean'), h('th', null, 'Max'), h('th', null, 'Last'))),
+    h('tbody', null, series.map((s) => { const st = stats(s.values); return h('tr', { key: s.name }, h('td', null, h('i', { style: { background: s.color } }), s.name), h('td', { className: 'num' }, format(st.mean)), h('td', { className: 'num' }, format(st.max)), h('td', { className: 'num' }, format(st.last))); })));
+}
+
+function TimeSeries({ labels, series, height = 230, legend = true, yFormat, refLine, format = money }) {
+  return h(Fragment, null, h(LineChart, { labels, series: series.map((s) => ({ ...s, smooth: true })), height, yFormat, refLine }), legend && h(LegendTable, { series: series.filter((s) => !s.dashed), format }));
 }
 
 /* ---------------------------------------------------------------- primitives */
@@ -315,9 +417,10 @@ function Overview({ data, go, onExplain }) {
       h('div', { className: 'card budget-kpi' }, h(Ring, { value: s.budget_utilization, size: 92, color: status.tone === 'bad' ? 'var(--red)' : status.tone === 'warn' ? 'var(--amber)' : 'var(--green)', label: s.budget_utilization == null ? '—' : Math.round(s.budget_utilization) + '%' }), h('div', null, h('div', { className: 'label' }, 'Budget Utilization'), h('div', { className: 'status ' + status.tone }, status.label), h('div', { className: 'note', style: { marginTop: 8 } }, `${compact(s.total_monthly_spend)} / ${compact(s.monthly_budget)}`)))),
 
     h('div', { className: 'grid row-trend gap-top' },
-      h(Card, { title: 'Spending Trend', icon: 'chart', action: h('div', { style: { marginLeft: 'auto' } }, h(Tabs, { tabs: [['history', '12 months'], ['forecast', '+ Forecast']], active: range, onChange: setRange })) },
-        h('div', { className: 'chart-legend' }, h('span', null, h('i', { className: 'legend-dot', style: { background: 'var(--green)' } }), 'Total spend'), showFc && h('span', { style: { color: 'var(--green)' } }, h('i', { className: 'legend-dash' }), h('span', { style: { color: 'var(--text-2)' } }, `Forecast (${forecast.method || 'scenario'})`))),
-        h(LineChart, { labels, series: trendSeries, highlight: totals.length ? { index: totals.length - 1, value: totals[totals.length - 1], color: 'var(--green)' } : null })),
+      h(Card, { title: 'Spending Trend', icon: 'chart', action: h('div', { style: { marginLeft: 'auto' } }, h(Tabs, { tabs: [['history', '12 months'], ['forecast', '+ Forecast'], ['stacked', 'By platform']], active: range, onChange: setRange })) },
+        range === 'stacked' ? h('div', { className: 'chart-legend' }, ['AWS', 'Kubernetes', 'AI'].map((p) => h('span', { key: p }, h('i', { className: 'legend-dot', style: { background: PLATFORM_COLORS[p] } }), p))) : h('div', { className: 'chart-legend' }, h('span', null, h('i', { className: 'legend-dot', style: { background: 'var(--green)' } }), 'Total spend'), showFc && h('span', { style: { color: 'var(--green)' } }, h('i', { className: 'legend-dash' }), h('span', { style: { color: 'var(--text-2)' } }, `Forecast (${forecast.method || 'scenario'})`))),
+        range === 'stacked' ? h(BarChart, { labels: history.map((p) => periodLabel(p.period)), stacked: true, height: 250, series: ['AWS', 'Kubernetes', 'AI'].map((p) => ({ name: p, values: history.map((r) => r[p]), color: PLATFORM_COLORS[p] })) })
+          : h(LineChart, { labels, series: trendSeries.map((x) => ({ ...x, smooth: true })), highlight: totals.length ? { index: totals.length - 1, value: totals[totals.length - 1], color: 'var(--green)' } : null })),
       h(Card, { title: 'Spend by Platform', icon: 'cloud', action: h('button', { className: 'link', onClick: () => go('costs', 'aws') }, 'View details', h(Icon, { name: 'arrowRight', size: 15 })) },
         h('div', { className: 'donut-wrap' }, h(Donut, { items: platforms, size: 138, stroke: 24, centerLabel: compact(platformTotal), centerSub: 'Total spend' }),
           h('div', { className: 'legend-list' }, platforms.map((p) => h('div', { className: 'legend-row', key: p.name }, h('span', { className: 'name' }, h('i', { className: 'legend-dot', style: { background: p.color } }), p.name), h('span', { className: 'muted num' }, pct(p.value / (platformTotal || 1) * 100)), h('span', { className: 'num' }, money(p.value)))))))),
@@ -364,6 +467,56 @@ function Scene() {
     [40, 62, 84, 130, 160].map((x, i) => h('path', { key: i, d: `M${x} 190 l7 -22 l7 22z`, fill: '#145236', opacity: .9 })));
 }
 
+/* ---------------------------------------------------------------- metrics (Grafana-style dashboard) */
+function clusterUtil(nodes) {
+  const cap = (k) => sum((nodes || []).map((n) => n[k]));
+  return { cpu: cap('cpu_capacity') ? cap('cpu_usage') / cap('cpu_capacity') * 100 : 0, mem: cap('memory_capacity') ? cap('memory_usage') / cap('memory_capacity') * 100 : 0, cpuReq: cap('cpu_capacity') ? cap('cpu_requested') / cap('cpu_capacity') * 100 : 0, memReq: cap('memory_capacity') ? cap('memory_requested') / cap('memory_capacity') * 100 : 0 };
+}
+function cacheHitRate(usage) {
+  const input = sum((usage || []).map((u) => u.input_tokens));
+  return input ? sum((usage || []).map((u) => u.input_tokens * (u.cache_hit_rate || 0))) / input * 100 : 0;
+}
+const UTIL_BAND = T.band(20, 40, 80);
+
+function MetricsPage({ tab, data }) {
+  const [dashboard, k8s, ai, governance, settings, waste] = data;
+  const months = Number(tab || 12);
+  const s = dashboard.summary || {}, cfg = settings.settings || {}, alertAt = Number(cfg.alert_threshold || 80);
+  const history = (dashboard.history || []).slice(-months);
+  const labels = history.map((p) => periodLabel(p.period));
+  const platformSeries = ['AWS', 'Kubernetes', 'AI'].map((p) => ({ name: p, values: history.map((r) => r[p]), color: PLATFORM_COLORS[p] }));
+  const totals = history.map((p) => p.total);
+  const nodes = k8s.nodes || [], util = clusterUtil(nodes);
+  const usage = ai.usage || [], models = ai.models || [];
+  const wasteItems = Object.entries(waste.by_category || {}).map(([k, v]) => { const [platform, cat] = k.split(' · '); return { label: catLabel(cat || k), value: v, color: PLATFORM_COLORS[platform] }; });
+  const tagCoverage = (governance.aws || {}).overall || 0;
+  const delta = change(totals);
+  return h('div', { className: 'gf-grid' },
+    h('div', { className: 'gf-row' }, h(Icon, { name: 'wallet', size: 15 }), 'Spend'),
+    h(Panel, { span: 3, title: 'Total spend', info: 'AWS + Kubernetes + AI for the latest month. Sparkline shows the selected range.' }, h(StatPanel, { value: s.total_monthly_spend, display: money(s.total_monthly_spend), spark: totals, color: 'var(--green)', sub: delta == null ? '' : `${delta >= 0 ? '▲' : '▼'} ${Math.abs(delta).toFixed(1)}% vs last month` })),
+    h(Panel, { span: 3, title: 'Potential savings', info: 'Unique, deduplicated opportunities. Colour follows waste as a share of spend.' }, h(StatPanel, { value: s.waste_pct, display: money(s.potential_monthly_savings), thresholds: T.lowerIsBetter(5, 10), sub: `${number(s.finding_count)} findings · ${pct(s.waste_pct)} of spend` })),
+    h(Panel, { span: 3, title: 'Budget used', info: `Thresholds: amber at the ${alertAt}% alert line, red above 100%.` }, h(Gauge, { value: s.budget_utilization || 0, max: 120, thresholds: T.lowerIsBetter(alertAt, 100), label: `${compact(s.total_monthly_spend)} of ${compact(s.monthly_budget)}` })),
+    h(Panel, { span: 3, title: 'Waste ratio', info: 'Potential savings / total spend. Under 5% is healthy.' }, h(Gauge, { value: s.waste_pct || 0, max: 20, decimals: 1, thresholds: T.lowerIsBetter(5, 10), label: 'of monthly spend' })),
+    h(Panel, { span: 7, title: 'Spend by platform', info: 'Monthly cost per platform with mean, max and last values.', right: `${months} months` }, h(TimeSeries, { labels, series: platformSeries, height: 220 })),
+    h(Panel, { span: 5, title: 'Monthly spend composition', info: 'Stacked monthly spend. Hover a bar for the split.' }, h(BarChart, { labels, series: platformSeries, stacked: true, height: 262 })),
+
+    h('div', { className: 'gf-row' }, h(Icon, { name: 'cube', size: 15 }), 'Efficiency'),
+    h(Panel, { span: 3, title: 'Tag coverage', info: 'Share of AWS resources carrying every required tag.' }, h(Gauge, { value: tagCoverage, thresholds: T.higherIsBetter(60, 85), decimals: 1, label: 'required tags present' })),
+    h(Panel, { span: 3, title: 'Cluster CPU utilization', info: 'Actual CPU usage / node capacity. Under 40% is paid-for idle capacity; over 80% is saturation risk.' }, h(Gauge, { value: util.cpu, thresholds: UTIL_BAND, decimals: 1, label: `requested ${pct(util.cpuReq, 0)}` })),
+    h(Panel, { span: 3, title: 'Cluster memory utilization', info: 'Actual memory usage / node capacity.' }, h(Gauge, { value: util.mem, thresholds: UTIL_BAND, decimals: 1, label: `requested ${pct(util.memReq, 0)}` })),
+    h(Panel, { span: 3, title: 'AI cache hit rate', info: 'Input-token-weighted share of prompt tokens served from cache.' }, h(Gauge, { value: cacheHitRate(usage), max: 60, thresholds: T.higherIsBetter(10, 25), decimals: 1, label: 'of input tokens' })),
+    h(Panel, { span: 6, title: 'Node CPU utilization', info: 'Per node, LCD bar gauge coloured by the utilization band.' }, h(BarGauge, { items: nodes.map((n) => ({ label: n.name, sub: n.instance_type, value: n.cpu_utilization * 100 })), max: 100, thresholds: UTIL_BAND })),
+    h(Panel, { span: 6, title: 'Node memory utilization', info: 'Per node, LCD bar gauge coloured by the utilization band.' }, h(BarGauge, { items: nodes.map((n) => ({ label: n.name, sub: n.instance_type, value: n.memory_utilization * 100 })), max: 100, thresholds: UTIL_BAND })),
+    h(Panel, { span: 6, title: 'Workload efficiency', info: 'Average of CPU and memory usage / requests. Low efficiency means over-requested capacity.' }, h(BarGauge, { mode: 'gradient', items: (k8s.workloads || []).map((w) => ({ label: w.name, sub: w.namespace, value: w.efficiency * 100 })).sort((a, b) => a.value - b.value), max: 100, thresholds: T.higherIsBetter(40, 60) })),
+    h(Panel, { span: 6, title: 'Namespace cost share', info: 'Share of allocated cluster cost per namespace.' }, h(BarGauge, { mode: 'gradient', items: (k8s.namespaces || []).map((n) => ({ label: n.namespace, sub: money(n.monthly_cost), value: n.cluster_cost_pct })), max: 100, thresholds: [{ value: -Infinity, color: 'var(--teal)' }, { value: 50, color: 'var(--blue)' }] })),
+
+    h('div', { className: 'gf-row' }, h(Icon, { name: 'sparkles', size: 15 }), 'Optimization & AI'),
+    h(Panel, { span: 6, title: 'Savings by category', info: 'Monthly savings estimate, coloured by platform.' }, h(HBarChart, { items: wasteItems })),
+    h(Panel, { span: 6, title: 'Tokens by model', info: 'Input vs output tokens for the latest period.' }, h(BarChart, { labels: models.map((m) => m.model), series: [{ name: 'Input tokens', values: models.map((m) => m.input_tokens), color: '#2a9d8f' }, { name: 'Output tokens', values: models.map((m) => m.output_tokens), color: '#7c5cd6' }], yFormat: tokens, valueFormat: tokens, height: 240 })),
+    h(Panel, { span: 6, title: 'Cost per 1K tokens', info: 'Blended unit price per model. Lower is cheaper per unit of work.' }, h(HBarChart, { items: models.map((m) => ({ label: m.model, value: m.cost_per_1k_tokens })).sort((a, b) => b.value - a.value), format: (v) => '$' + Number(v).toFixed(4), color: 'var(--purple)' })),
+    h(Panel, { span: 6, title: 'AI spend by application', info: 'Monthly AI cost allocated to the application creating the demand.' }, h(HBarChart, { items: (ai.applications || []).map((a) => ({ label: a.application, value: a.cost })), color: 'var(--green)' })));
+}
+
 /* ---------------------------------------------------------------- recommendation table */
 function RecommendationTable({ items, onExplain }) {
   return h(Table, { empty: 'No findings match the current filters and thresholds.', headers: [
@@ -378,12 +531,15 @@ function RecommendationTable({ items, onExplain }) {
 
 /* ---------------------------------------------------------------- pages */
 function CostsPage({ tab, data, onExplain }) {
-  const [d] = data;
+  const [d, histResp] = data;
   if (tab === 'aws') {
     const entries = (obj) => Object.entries(obj || {}).map(([name, value]) => ({ name, value, share: value / (d.total_monthly_cost || 1) * 100, key: name })).sort((a, b) => b.value - a.value);
     const svc = entries(d.by_service);
     return h(Fragment, null,
       h('div', { className: 'metric-strip' }, h(Stat, { label: 'Monthly AWS spend', value: money(d.total_monthly_cost), note: 'Cost Explorer (demo dataset in demo mode)' }), h(Stat, { label: 'Services', value: number(svc.length) }), h(Stat, { label: 'Regions', value: number(Object.keys(d.by_region || {}).length) }), h(Stat, { label: 'Teams allocated', value: number(Object.keys(d.by_team || {}).length), note: 'From cost allocation tags' })),
+      h('div', { className: 'gf-grid', style: { marginBottom: 18 } },
+        h(Panel, { span: 7, title: 'Monthly spend by platform', info: 'Stacked AWS, Kubernetes and AI cost per month.' }, h(BarChart, { labels: ((histResp && histResp.history) || []).map((p) => periodLabel(p.period)), stacked: true, height: 250, series: ['AWS', 'Kubernetes', 'AI'].map((p) => ({ name: p, values: ((histResp && histResp.history) || []).map((r) => r[p]), color: PLATFORM_COLORS[p] })) })),
+        h(Panel, { span: 5, title: 'Top services', info: 'Monthly AWS cost by service.' }, h(HBarChart, { items: svc.map((r, i) => ({ label: r.name, value: r.value, color: SERIES_COLORS[i % SERIES_COLORS.length] })) }))),
       h('div', { className: 'grid two' },
         h(Card, { title: 'Spend by service', icon: 'chart' }, h(Table, { headers: [{ label: 'Service', key: 'name' }, { label: 'Share', render: (r) => h('div', { style: { minWidth: 110 } }, h(Progress, { value: r.share, color: 'var(--green)' })) }, { label: 'Cost', right: true, render: (r) => money(r.value) }, { label: '%', right: true, render: (r) => pct(r.share) }], rows: svc })),
         h(Card, { title: 'Allocation views', icon: 'layers' }, h(Table, { headers: [{ label: 'Dimension', key: 'name' }, { label: 'Cost', right: true, render: (r) => money(r.value) }, { label: '%', right: true, render: (r) => pct(r.share) }], rows: entries(d.by_team).map((r) => ({ ...r, name: 'Team · ' + r.name, key: 't' + r.name })).concat(entries(d.by_environment).map((r) => ({ ...r, name: 'Environment · ' + r.name, key: 'e' + r.name }))).concat(entries(d.by_region).map((r) => ({ ...r, name: 'Region · ' + r.name, key: 'r' + r.name }))) }))));
@@ -393,7 +549,7 @@ function CostsPage({ tab, data, onExplain }) {
     const max = Math.max(...cats.map((c) => c.value), 1);
     return h(Fragment, null,
       h('div', { className: 'metric-strip' }, h(Stat, { label: 'Identified waste', value: money(d.total_waste), note: 'Monthly, unique findings' }), h(Stat, { label: 'Findings', value: number((d.findings || []).length) }), h(Stat, { label: 'High priority', value: number((d.findings || []).filter((f) => f.priority === 'HIGH').length) }), h(Stat, { label: 'Remediation', value: 'Manual', note: 'Nothing is auto-applied' })),
-      h('div', { className: 'grid two' }, h(Card, { title: 'Waste by category', icon: 'chart' }, cats.map((c) => h('div', { key: c.key, style: { margin: '10px 0' } }, h('div', { style: { display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 } }, h('span', null, c.name), h('strong', { className: 'num' }, money(c.value))), h(Progress, { value: c.value / max * 100, color: 'var(--orange)' })))),
+      h('div', { className: 'grid two' }, h(Card, { title: 'Waste by category', icon: 'chart' }, h(HBarChart, { items: cats.map((c) => { const [platform, cat] = c.name.split(' · '); return { label: catLabel(cat || c.name), value: c.value, color: PLATFORM_COLORS[platform] }; }) })),
         h(Card, { title: 'How savings are counted', icon: 'shield' }, h('div', { className: 'callout' }, h('strong', null, 'One identity per opportunity. '), 'Each finding is keyed by platform + resource + category, so the same dollars cannot be counted twice across the waste, optimization, and platform views. Every number is an estimate with a confidence and risk rating, and should be validated before action.'))),
       h(Card, { title: 'Waste findings', icon: 'zap', iconTone: 'orange', className: 'gap-top' }, h(RecommendationTable, { items: d.findings || [], onExplain })));
   }
@@ -428,13 +584,20 @@ function KubernetesPage({ tab, data, onExplain }) {
     return h(Fragment, null,
       h('div', { className: 'metric-strip' }, h(Stat, { label: 'Cluster cost', value: money(c.monthly_cost), note: c.name }), h(Stat, { label: 'Allocated', value: money(c.allocated_cost), note: 'To namespaces and workloads' }), h(Stat, { label: 'Unallocated', value: money(c.unallocated_cost), note: 'Visible, not counted as savings' }), h(Stat, { label: 'Allocation efficiency', value: pct(c.efficiency) })),
       h('div', { className: 'grid two' },
-        h(Card, { title: 'Node utilization', icon: 'server' }, h(Table, { headers: [{ label: 'Node', key: 'name' }, { label: 'CPU', render: (r) => h('div', { style: { minWidth: 90 } }, h(Progress, { value: r.cpu_utilization * 100, color: 'var(--green)' })) }, { label: 'Memory', render: (r) => h('div', { style: { minWidth: 90 } }, h(Progress, { value: r.memory_utilization * 100, color: 'var(--teal)' })) }, { label: 'Cost', right: true, render: (r) => money(r.monthly_cost) }], rows: (d.nodes || []).map((n) => ({ ...n, key: n.node_id })) })),
+        h(Card, { title: 'Node utilization', icon: 'server', meta: 'CPU · memory' }, h(BarGauge, { items: (d.nodes || []).flatMap((n) => [{ key: n.node_id + 'c', label: n.name + ' · CPU', sub: n.instance_type + ' · ' + money(n.monthly_cost), value: n.cpu_utilization * 100 }, { key: n.node_id + 'm', label: n.name + ' · Mem', value: n.memory_utilization * 100 }]), max: 100, thresholds: UTIL_BAND, cells: 24 })),
         h(Card, { title: 'Namespace allocation', icon: 'layers' }, h(Table, { headers: [{ label: 'Namespace', key: 'namespace' }, { label: 'Cost', right: true, render: (r) => money(r.monthly_cost) }, { label: 'Share', right: true, render: (r) => pct(r.cluster_cost_pct) }], rows: (d.namespaces || []).map((n) => ({ ...n, key: n.namespace })) }))),
       h(Card, { title: 'Top Kubernetes opportunities', icon: 'zap', iconTone: 'orange', className: 'gap-top' }, h(RecommendationTable, { items: (d.recommendations || []).filter((f) => f.estimated_monthly_savings > 0).slice(0, 6), onExplain })));
   }
-  if (tab === 'workloads') return h(Card, { title: 'Requests vs actual usage', icon: 'cube', meta: 'CPU cores / memory GiB' }, h(Table, { headers: [{ label: 'Workload', render: (r) => h('div', null, h('div', { className: 'cell-title' }, r.name), h('div', { className: 'cell-sub' }, `${r.namespace} · ${r.type} · ${r.replicas} replicas`)) }, { label: 'CPU req / used', right: true, render: (r) => `${r.cpu_request} / ${r.cpu_usage}` }, { label: 'Memory req / used', right: true, render: (r) => `${r.memory_request} / ${r.memory_usage}` }, { label: 'Efficiency', render: (r) => h('div', { style: { minWidth: 100 } }, h(Progress, { value: r.efficiency * 100, color: r.efficiency < .4 ? 'var(--orange)' : 'var(--green)' })) }, { label: 'Suggested CPU / mem', right: true, render: (r) => `${r.recommended_cpu_request} / ${r.recommended_memory_request}` }, { label: 'Savings', right: true, render: (r) => money(r.estimated_savings) }], rows: (d.workloads || []).map((w) => ({ ...w, key: w.workload_id })) }));
+  if (tab === 'workloads') return h(Fragment, null, h('div', { className: 'gf-grid', style: { marginBottom: 18 } }, h(Panel, { span: 6, title: 'CPU efficiency', info: 'Usage / request per workload' }, h(BarGauge, { mode: 'gradient', items: (d.workloads || []).map((w) => ({ label: w.name, sub: w.namespace, value: w.cpu_efficiency * 100 })), max: 100, thresholds: T.higherIsBetter(40, 60) })), h(Panel, { span: 6, title: 'Memory efficiency', info: 'Usage / request per workload' }, h(BarGauge, { mode: 'gradient', items: (d.workloads || []).map((w) => ({ label: w.name, sub: w.namespace, value: w.memory_efficiency * 100 })), max: 100, thresholds: T.higherIsBetter(50, 70) }))), h(Card, { title: 'Requests vs actual usage', icon: 'cube', meta: 'CPU cores / memory GiB' }, h(Table, { headers: [{ label: 'Workload', render: (r) => h('div', null, h('div', { className: 'cell-title' }, r.name), h('div', { className: 'cell-sub' }, `${r.namespace} · ${r.type} · ${r.replicas} replicas`)) }, { label: 'CPU req / used', right: true, render: (r) => `${r.cpu_request} / ${r.cpu_usage}` }, { label: 'Memory req / used', right: true, render: (r) => `${r.memory_request} / ${r.memory_usage}` }, { label: 'Efficiency', render: (r) => h('div', { style: { minWidth: 100 } }, h(Progress, { value: r.efficiency * 100, color: r.efficiency < .4 ? 'var(--orange)' : 'var(--green)' })) }, { label: 'Suggested CPU / mem', right: true, render: (r) => `${r.recommended_cpu_request} / ${r.recommended_memory_request}` }, { label: 'Savings', right: true, render: (r) => money(r.estimated_savings) }], rows: (d.workloads || []).map((w) => ({ ...w, key: w.workload_id })) })));
   if (tab === 'namespaces') return h(Card, { title: 'Namespace showback', icon: 'layers' }, h(Table, { headers: [{ label: 'Namespace', key: 'namespace' }, { label: 'Workloads', right: true, key: 'workload_count' }, { label: 'Pods', right: true, key: 'pod_count' }, { label: 'CPU cost', right: true, render: (r) => money(r.cpu_cost) }, { label: 'Memory cost', right: true, render: (r) => money(r.memory_cost) }, { label: 'Total', right: true, render: (r) => money(r.monthly_cost) }, { label: 'Share', right: true, render: (r) => pct(r.cluster_cost_pct) }], rows: (d.namespaces || []).map((n) => ({ ...n, key: n.namespace })) }));
-  return h(Card, { title: 'Node capacity posture', icon: 'server', meta: 'Low utilization is not proof a node can be removed' }, h(Table, { headers: [{ label: 'Node', key: 'name' }, { label: 'Instance type', key: 'instance_type' }, { label: 'CPU', right: true, render: (r) => pct(r.cpu_utilization * 100) }, { label: 'Memory', right: true, render: (r) => pct(r.memory_utilization * 100) }, { label: 'Monthly cost', right: true, render: (r) => money(r.monthly_cost) }, { label: 'Status', render: (r) => r.utilization < .3 ? h(Pill, { tone: 'medium' }, 'Underutilized') : h(Pill, { tone: 'low' }, 'Healthy') }], rows: (d.nodes || []).map((n) => ({ ...n, key: n.node_id })) }));
+  const u = clusterUtil(d.nodes || []);
+  return h(Fragment, null, h('div', { className: 'gf-grid', style: { marginBottom: 18 } },
+    h(Panel, { span: 3, title: 'CPU used', info: 'Usage / capacity' }, h(Gauge, { value: u.cpu, thresholds: UTIL_BAND, decimals: 1, label: 'of capacity' })),
+    h(Panel, { span: 3, title: 'CPU requested', info: 'Requests / capacity' }, h(Gauge, { value: u.cpuReq, thresholds: T.band(30, 50, 90), decimals: 1, label: 'of capacity' })),
+    h(Panel, { span: 3, title: 'Memory used', info: 'Usage / capacity' }, h(Gauge, { value: u.mem, thresholds: UTIL_BAND, decimals: 1, label: 'of capacity' })),
+    h(Panel, { span: 3, title: 'Memory requested', info: 'Requests / capacity' }, h(Gauge, { value: u.memReq, thresholds: T.band(30, 50, 90), decimals: 1, label: 'of capacity' })),
+    h(Panel, { span: 12, title: 'Average utilization per node', info: 'Mean of CPU and memory utilization' }, h(BarGauge, { items: (d.nodes || []).map((n) => ({ label: n.name, sub: n.instance_type, value: n.utilization * 100 })), max: 100, thresholds: UTIL_BAND, cells: 40 }))),
+  h(Card, { title: 'Node capacity posture', icon: 'server', meta: 'Low utilization is not proof a node can be removed' }, h(Table, { headers: [{ label: 'Node', key: 'name' }, { label: 'Instance type', key: 'instance_type' }, { label: 'CPU', right: true, render: (r) => pct(r.cpu_utilization * 100) }, { label: 'Memory', right: true, render: (r) => pct(r.memory_utilization * 100) }, { label: 'Monthly cost', right: true, render: (r) => money(r.monthly_cost) }, { label: 'Status', render: (r) => r.utilization < .3 ? h(Pill, { tone: 'medium' }, 'Underutilized') : h(Pill, { tone: 'low' }, 'Healthy') }], rows: (d.nodes || []).map((n) => ({ ...n, key: n.node_id })) })));
 }
 
 function AIPage({ tab, data, onExplain }) {
@@ -449,7 +612,10 @@ function AIPage({ tab, data, onExplain }) {
       h(Card, { title: 'AI optimization opportunities', icon: 'sparkles', className: 'gap-top' }, h(RecommendationTable, { items: (d.recommendations || []).filter((f) => f.estimated_monthly_savings > 0), onExplain })));
   }
   if (tab === 'usage') return h(Card, { title: 'Normalized token usage', icon: 'sparkles', meta: 'Provider-neutral records' }, h(Table, { headers: [{ label: 'Application', render: (r) => h('div', null, h('div', { className: 'cell-title' }, r.application), h('div', { className: 'cell-sub' }, `${r.team} · ${r.environment}`)) }, { label: 'Provider / model', render: (r) => h('div', null, h('div', null, r.model), h('div', { className: 'cell-sub' }, r.provider)) }, { label: 'Requests', right: true, render: (r) => number(r.request_count) }, { label: 'Input', right: true, render: (r) => tokens(r.input_tokens) }, { label: 'Output', right: true, render: (r) => tokens(r.output_tokens) }, { label: 'Cache hit', right: true, render: (r) => pct((r.cache_hit_rate || 0) * 100) }, { label: 'Latency', right: true, render: (r) => Math.round(r.latency_ms) + ' ms' }, { label: 'Cost', right: true, render: (r) => money(r.cost) }], rows: (d.usage || []).map((u, i) => ({ ...u, key: i })) }));
-  if (tab === 'models') return h(Card, { title: 'Model economics', icon: 'cpu' }, h(Table, { headers: [{ label: 'Model', render: (r) => h('div', null, h('div', { className: 'cell-title' }, r.model), h('div', { className: 'cell-sub' }, r.provider)) }, { label: 'Requests', right: true, render: (r) => number(r.requests) }, { label: 'Tokens', right: true, render: (r) => tokens(r.total_tokens) }, { label: 'Cost / request', right: true, render: (r) => '$' + Number(r.cost_per_request).toFixed(4) }, { label: 'Cost / 1K tokens', right: true, render: (r) => '$' + Number(r.cost_per_1k_tokens).toFixed(4) }, { label: 'Latency', right: true, render: (r) => Math.round(r.latency_ms) + ' ms' }, { label: 'Cost', right: true, render: (r) => money(r.cost) }], rows: (d.models || []).map((m) => ({ ...m, key: m.model })) }));
+  if (tab === 'models') return h(Fragment, null, h('div', { className: 'gf-grid', style: { marginBottom: 18 } },
+    h(Panel, { span: 7, title: 'Tokens by model', info: 'Input vs output tokens' }, h(BarChart, { labels: (d.models || []).map((m) => m.model), series: [{ name: 'Input tokens', values: (d.models || []).map((m) => m.input_tokens), color: '#2a9d8f' }, { name: 'Output tokens', values: (d.models || []).map((m) => m.output_tokens), color: '#7c5cd6' }], yFormat: tokens, valueFormat: tokens })),
+    h(Panel, { span: 5, title: 'Cost per 1K tokens', info: 'Blended unit price' }, h(HBarChart, { items: (d.models || []).map((m) => ({ label: m.model, value: m.cost_per_1k_tokens })).sort((a, b) => b.value - a.value), format: (v) => '$' + Number(v).toFixed(4), color: 'var(--purple)' }))),
+  h(Card, { title: 'Model economics', icon: 'cpu' }, h(Table, { headers: [{ label: 'Model', render: (r) => h('div', null, h('div', { className: 'cell-title' }, r.model), h('div', { className: 'cell-sub' }, r.provider)) }, { label: 'Requests', right: true, render: (r) => number(r.requests) }, { label: 'Tokens', right: true, render: (r) => tokens(r.total_tokens) }, { label: 'Cost / request', right: true, render: (r) => '$' + Number(r.cost_per_request).toFixed(4) }, { label: 'Cost / 1K tokens', right: true, render: (r) => '$' + Number(r.cost_per_1k_tokens).toFixed(4) }, { label: 'Latency', right: true, render: (r) => Math.round(r.latency_ms) + ' ms' }, { label: 'Cost', right: true, render: (r) => money(r.cost) }], rows: (d.models || []).map((m) => ({ ...m, key: m.model })) })));
   if (tab === 'applications') return h(Card, { title: 'Cost by application', icon: 'layers', meta: 'Showback to teams' }, h(Table, { headers: [{ label: 'Application', key: 'application' }, { label: 'Team', key: 'team' }, { label: 'Environment', key: 'environment' }, { label: 'Requests', right: true, render: (r) => number(r.requests) }, { label: 'Tokens', right: true, render: (r) => tokens(r.tokens) }, { label: 'Cost / request', right: true, render: (r) => '$' + Number(r.cost_per_request).toFixed(4) }, { label: 'Cost', right: true, render: (r) => money(r.cost) }], rows: (d.applications || []).map((a) => ({ ...a, key: a.application })) }));
   if (tab === 'anomalies') return h(Fragment, null, h('div', { className: 'metric-strip' }, h(Stat, { label: 'Open anomalies', value: number((d.anomalies || []).length) }), h(Stat, { label: 'Baseline spend', value: money(d.baseline_spend) }), h(Stat, { label: 'Current spend', value: money(d.current_spend) }), h(Stat, { label: 'Change', value: pct((d.current_spend - d.baseline_spend) / (d.baseline_spend || 1) * 100) })),
     h(Card, { title: 'Anomaly queue', icon: 'bell', meta: 'Investigate before acting' }, h(Table, { headers: [{ label: 'Severity', render: (r) => h(Pill, { tone: r.severity === 'HIGH' ? 'high' : 'medium' }, r.severity) }, { label: 'Anomaly', render: (r) => h('div', null, h('div', { className: 'cell-title' }, r.title), h('div', { className: 'cell-sub' }, r.detail)) }, { label: 'Primary cause', key: 'primary_cause' }, { label: 'Added cost', right: true, render: (r) => money(r.estimated_additional_cost) }, { label: 'Status', render: (r) => h(Pill, { tone: 'neutral' }, r.status) }], rows: (d.anomalies || []).map((a) => ({ ...a, key: a.id })) })));
@@ -460,11 +626,20 @@ function BudgetsPage({ tab, data, go }) {
   const [dashboard, governance, settings, anomalies] = data;
   const alerts = computeAlerts({ dashboard, governance, settings, anomalies });
   const g = governance, aws = g.aws || {}, k8s = g.kubernetes || {}, ai = g.ai || {}, s = dashboard.summary || {};
+  const alertAt = Number((settings.settings || {}).alert_threshold || 80);
   if (tab === 'alerts') return h(Fragment, null,
-    h('div', { className: 'metric-strip' }, h(Stat, { label: 'Open alerts', value: number(alerts.length) }), h(Stat, { label: 'Cloud + AI budget', value: money(s.monthly_budget), note: 'budgets.total in config.yaml' }), h(Stat, { label: 'Utilization', value: s.budget_utilization == null ? '—' : pct(s.budget_utilization) }), h(Stat, { label: 'AI budget utilization', value: pct(ai.budget_utilization), note: money(ai.monthly_budget) + ' monthly' })),
+    h('div', { className: 'gf-grid', style: { marginBottom: 18 } },
+      h(Panel, { span: 3, title: 'Open alerts', info: 'Budget, anomaly and policy alerts' }, h(StatPanel, { value: alerts.length, display: number(alerts.length), thresholds: T.lowerIsBetter(1, 4), sub: 'computed from live thresholds' })),
+      h(Panel, { span: 3, title: 'Cloud + AI budget', info: 'budgets.total in config.yaml' }, h(Gauge, { value: s.budget_utilization || 0, max: 120, decimals: 1, thresholds: T.lowerIsBetter(alertAt, 100), label: compact(s.total_monthly_spend) + ' of ' + compact(s.monthly_budget) })),
+      h(Panel, { span: 3, title: 'AI budget', info: 'ai_finops.monthly_budget' }, h(Gauge, { value: ai.budget_utilization || 0, max: 150, decimals: 1, thresholds: T.lowerIsBetter(alertAt, 100), label: compact(ai.spend) + ' of ' + compact(ai.monthly_budget) })),
+      h(Panel, { span: 3, title: 'Alert threshold', info: 'Set in Settings' }, h(StatPanel, { value: alertAt, display: alertAt + '%', color: 'var(--amber)', sub: 'warning line on every budget gauge' }))),
     h(Card, { title: 'Alerts', icon: 'bell' }, alerts.length ? alerts.map((a, i) => h('div', { className: 'alert-row', key: i }, h('span', { className: 'check-icon ' + a.tone, style: { width: 26, height: 26 } }, h(Icon, { name: 'alert', size: 14, stroke: 2.4 })), h('div', { style: { flex: 1 } }, h('div', { className: 'title' }, a.title), h('div', { className: 'sub' }, a.sub)), h('button', { className: 'btn ghost', onClick: () => go(a.page, a.tab) }, 'Open'))) : h('div', { className: 'empty' }, 'No alerts. Spend, budgets and policies are within thresholds.')));
   return h(Fragment, null,
-    h('div', { className: 'metric-strip' }, h(Stat, { label: 'AWS tag compliance', value: pct(aws.overall) }), h(Stat, { label: 'K8s requests set', value: pct(k8s.requests_compliance) }), h(Stat, { label: 'K8s limits set', value: pct(k8s.limits_compliance) }), h(Stat, { label: 'AI budget headroom', value: pct(ai.budget_compliance) })),
+    h('div', { className: 'gf-grid', style: { marginBottom: 18 } },
+      h(Panel, { span: 3, title: 'AWS tag compliance', info: 'Average coverage of required tags' }, h(Gauge, { value: aws.overall, decimals: 1, thresholds: T.higherIsBetter(60, 85), label: 'tag coverage' })),
+      h(Panel, { span: 3, title: 'K8s requests set', info: 'Workloads with CPU and memory requests' }, h(Gauge, { value: k8s.requests_compliance, decimals: 1, thresholds: T.higherIsBetter(70, 95), label: 'of workloads' })),
+      h(Panel, { span: 3, title: 'K8s limits set', info: 'Workloads with limits' }, h(Gauge, { value: k8s.limits_compliance, decimals: 1, thresholds: T.higherIsBetter(70, 95), label: 'of workloads' })),
+      h(Panel, { span: 3, title: 'AI budget used', info: 'AI spend / AI monthly budget' }, h(Gauge, { value: ai.budget_utilization, max: 150, decimals: 1, thresholds: T.lowerIsBetter(Number((settings.settings || {}).alert_threshold || 80), 100), label: money(ai.spend) + ' of ' + money(ai.monthly_budget) }))),
     h('div', { className: 'grid two' },
       h(Card, { title: 'Required tags', icon: 'shield', meta: 'From config.yaml' }, h('div', { className: 'tag-row', style: { marginBottom: 14 } }, (g.required_tags || []).map((t) => h('span', { className: 'tag', key: t }, t))), Object.entries(aws.by_tag || {}).map(([tag, v]) => h('div', { key: tag, style: { margin: '12px 0' } }, h('div', { style: { display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 } }, h('span', null, tag), h('strong', { className: 'num' }, pct(v))), h(Progress, { value: v, color: v >= 85 ? 'var(--green)' : 'var(--amber)' })))),
       h(Card, { title: 'Policy exceptions', icon: 'alert', iconTone: 'orange' }, h('div', { className: 'note' }, 'Workloads without requests'), h('div', { className: 'tag-row', style: { margin: '8px 0 16px' } }, (k8s.workloads_without_requests || []).map((w) => h('span', { className: 'tag', key: w }, w))), h('div', { className: 'note' }, 'Workloads without limits'), h('div', { className: 'tag-row', style: { margin: '8px 0 16px' } }, (k8s.workloads_without_limits || []).map((w) => h('span', { className: 'tag', key: w }, w))), h('div', { className: 'callout' }, 'AI spend is ', h('strong', null, pct(ai.budget_utilization)), ' of the ', h('strong', null, money(ai.monthly_budget)), ' monthly AI budget.'))),
@@ -508,7 +683,8 @@ function MethodModal({ onClose }) {
 /* ---------------------------------------------------------------- app shell */
 const PAGES = {
   overview: { label: 'Overview', icon: 'home', tabs: null, load: () => loadAll(['/api/dashboard', '/api/forecast', '/api/governance', '/api/ai/overview', '/api/settings', '/api/recommendations']) },
-  costs: { label: 'Cost Analytics', icon: 'chart', title: 'Cost analytics', sub: 'Where the money goes, what is wasted, and where spend is heading.', tabs: [['aws', 'AWS costs'], ['waste', 'Waste'], ['forecast', 'Forecast']], load: (t) => loadAll([{ aws: '/api/costs', waste: '/api/waste', forecast: '/api/forecast' }[t]]) },
+  metrics: { label: 'Metrics', icon: 'gauge', title: 'Metrics', sub: 'Grafana-style panels: time series, bar charts, gauges and bar gauges over the same engine data.', tabs: [['3', 'Last 3 months'], ['6', 'Last 6 months'], ['12', 'Last 12 months']], load: () => loadAll(['/api/dashboard', '/api/kubernetes/overview', '/api/ai/overview', '/api/governance', '/api/settings', '/api/waste']) },
+  costs: { label: 'Cost Analytics', icon: 'chart', title: 'Cost analytics', sub: 'Where the money goes, what is wasted, and where spend is heading.', tabs: [['aws', 'AWS costs'], ['waste', 'Waste'], ['forecast', 'Forecast']], load: (t) => t === 'aws' ? loadAll(['/api/costs', '/api/cost-history']) : loadAll([{ waste: '/api/waste', forecast: '/api/forecast' }[t]]) },
   optimization: { label: 'Optimization', icon: 'zap', title: 'Optimization queue', sub: 'Deduplicated, explainable opportunities across AWS, Kubernetes and AI.', tabs: [['all', 'All'], ['aws', 'AWS'], ['kubernetes', 'Kubernetes'], ['ai', 'AI']], load: () => loadAll(['/api/recommendations']) },
   kubernetes: { label: 'Kubernetes', icon: 'cube', title: 'Kubernetes cost allocation', sub: 'Requests versus real usage, allocated to the namespaces and teams that create it.', tabs: [['overview', 'Overview'], ['workloads', 'Workloads'], ['namespaces', 'Namespaces'], ['nodes', 'Nodes']], load: (t) => loadAll([{ overview: '/api/kubernetes/overview', workloads: '/api/kubernetes/workloads', namespaces: '/api/kubernetes/namespaces', nodes: '/api/kubernetes/nodes' }[t]]) },
   ai: { label: 'AI Insights', icon: 'sparkles', title: 'AI inference economics', sub: 'Tokens, models and applications, tied back to cost and business units.', tabs: [['overview', 'Overview'], ['usage', 'Token usage'], ['models', 'Models'], ['applications', 'Applications'], ['anomalies', 'Anomalies'], ['unit', 'Unit economics']], load: (t) => t === 'overview' ? loadAll(['/api/ai/overview', '/api/ai/cost-history']) : loadAll([{ usage: '/api/ai/usage', models: '/api/ai/models', applications: '/api/ai/applications', anomalies: '/api/ai/anomalies', unit: '/api/ai/unit-economics' }[t]]) },
@@ -520,7 +696,7 @@ function parseHash() {
   const [page = 'overview', tab, filter] = (window.location.hash || '').replace(/^#\/?/, '').split('/');
   const p = PAGES[page] ? page : 'overview';
   const tabs = PAGES[p].tabs;
-  return { page: p, tab: tabs ? (tabs.some(([k]) => k === tab) ? tab : tabs[0][0]) : null, filter: filter ? decodeURIComponent(filter) : null };
+  return { page: p, tab: tabs ? (tabs.some(([k]) => k === tab) ? tab : (p === 'metrics' ? '12' : tabs[0][0])) : null, filter: filter ? decodeURIComponent(filter) : null };
 }
 function readTheme() { try { return localStorage.getItem('finops-theme'); } catch (e) { return null; } }
 function writeTheme(v) { try { localStorage.setItem('finops-theme', v); } catch (e) { /* storage unavailable */ } }
@@ -567,6 +743,7 @@ function App() {
     const props = { tab: route.tab, data, go, onExplain: setExplain };
     switch (route.page) {
       case 'overview': return h(Overview, props);
+      case 'metrics': return h(MetricsPage, props);
       case 'costs': return h(CostsPage, props);
       case 'optimization': return h(OptimizationPage, { ...props, filter: route.filter, query });
       case 'kubernetes': return h(KubernetesPage, props);

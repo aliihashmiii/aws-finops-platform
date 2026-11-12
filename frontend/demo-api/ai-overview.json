@@ -48,7 +48,7 @@
   ],
   "cost_per_1k_tokens": 0.0452,
   "input_tokens": 103000000,
-  "last_updated": "2026-11-12T03:55:08.068112+00:00",
+  "last_updated": "2026-11-12T03:59:56.480219+00:00",
   "mode": "demo",
   "models": [
     {
