@@ -63,9 +63,23 @@ python3 -m uvicorn backend.main:app --reload
 
 Open [http://127.0.0.1:8000](http://127.0.0.1:8000). The demo dataset includes AWS services and resources, a multi-node Kubernetes cluster with namespaces and workloads, and multiple AI providers and models. Totals reconcile across platform views.
 
+### Dashboard sections
+
+| Section | What it shows |
+| --- | --- |
+| Overview | KPI cards with sparklines, spend trend with forecast or stacked-by-platform view, platform mix, grouped opportunities, AI economics, FinOps health score, forecast vs budget |
+| Metrics | Grafana-style board with a 3/6/12-month range: stat panels, threshold-coloured gauges, LCD and gradient bar gauges, smooth time series with mean/max/last legends, stacked and grouped bar charts |
+| Cost Analytics | AWS service, team, environment and region views; waste by category; forecast scenarios |
+| Optimization | Deduplicated recommendation queue with platform tabs, search and per-finding explanations |
+| Kubernetes | Allocation, node and workload efficiency gauges, namespace showback |
+| AI Insights | Token usage, model economics, application allocation, anomalies, unit economics |
+| Budgets & Alerts | Budget gauges, computed alerts, tag and Kubernetes policy compliance |
+
+Gauge and bar-gauge colours use Grafana-style step thresholds. Utilization uses a band (too low is paid-for idle capacity, too high is saturation risk); budgets turn amber at the configured alert threshold and red above 100%.
+
 ### Permanent static website
 
-The repository includes a ready-to-publish static artifact under `docs/`. In GitHub, open **Settings → Pages**, choose **Deploy from a branch**, select `main`, select the `/docs` folder, and save. GitHub Pages will publish the project-site URL shown above. The site is intentionally read-only in static mode: settings changes are previewed locally but are not written to `config.yaml` without the FastAPI backend. Run `python3 scripts/generate_static_demo.py` after changing demo service behavior so both `frontend/demo-api/` and `docs/demo-api/` stay synchronized.
+The repository includes a ready-to-publish static artifact under `docs/`. In GitHub, open **Settings → Pages**, choose **Deploy from a branch**, select `main`, select the `/docs` folder, and save. GitHub Pages will publish the project-site URL shown above. The site is intentionally read-only in static mode: settings changes are previewed locally but are not written to `config.yaml` without the FastAPI backend. Run `python3 scripts/generate_static_demo.py` after changing the frontend or demo service behavior; it regenerates `frontend/demo-api/` and `docs/demo-api/` and copies the client (`index.html`, `app.js`, `styles.css`, `vendor/`) into `docs/` so the Pages site never drifts from the app.
 
 ## Live mode
 
@@ -188,7 +202,7 @@ finops/
 frontend/
   index.html                      React shell
   app.js                          API-backed dashboard client with static fallback
-  styles.css                      Enterprise dark UI system
+  styles.css                      Light/dark design tokens and layout
   demo-api/                       Generated read-only fixtures for GitHub Pages
   vendor/                         Locally vendored React runtime
 scripts/

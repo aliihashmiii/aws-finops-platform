@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -50,7 +51,11 @@ def main() -> None:
     for output in OUTS:
         for name, payload in payloads.items():
             (output / f"{name}.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(f"wrote {len(payloads)} fixtures to {len(OUTS)} static targets")
+    # Keep the GitHub Pages copy of the client identical to frontend/.
+    for asset in ("index.html", "app.js", "styles.css"):
+        shutil.copyfile(ROOT / "frontend" / asset, ROOT / "docs" / asset)
+    shutil.copytree(ROOT / "frontend" / "vendor", ROOT / "docs" / "vendor", dirs_exist_ok=True)
+    print(f"wrote {len(payloads)} fixtures to {len(OUTS)} static targets and synced docs/ client assets")
 
 
 if __name__ == "__main__":
